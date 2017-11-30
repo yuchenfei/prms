@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/base.css" rel="stylesheet">
+    {% block extrahead %}{% endblock %}
+    <title>研究生科研管理系统</title>
+</head>
+<body>
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">研究生科研管理系统</a>
+        {% if user.username %}
+            <ul class="nav navbar-nav navbar-right">
+                <li><p class="navbar-text">{{ user.username }} 已登陆</p></li>
+                <li>
+{#                    <form action="{% url 'logout' %}">#}
+{#                        <button type="submit" class="btn btn-default navbar-btn">登出</button>#}
+{#                    </form>#}
+                </li>
+            </ul>
+        {% else %}
+            <form action="{% url 'choose_login_type' %}">
+                <button type="submit" class="btn btn-default navbar-btn navbar-right">登陆</button>
+            </form>
+        {% endif %}
+    </div>
+</nav>
+<div class="container">
+    {% block content %}{% endblock %}
+</div>
+<script src="http://code.jquery.com/jquery.min.js"></script>
+<script src="/static/bootstrap/js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -1,3 +1,6 @@
 from django.contrib import admin
 
-# Register your models here.
+from management.models import Teacher, Postgraduate
+
+admin.site.register(Teacher)
+admin.site.register(Postgraduate)

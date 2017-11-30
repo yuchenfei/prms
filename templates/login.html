@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block extrahead %}
+    <link href="/static/login.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+    <form class="form-login" action="{{ url }}" method="post">
+        <h2 class="form-login-heading">请{{ user_type }}登录系统</h2>
+        {% csrf_token %}
+        {{ form }}
+        <button class="btn btn-lg btn-primary btn-block" type="submit">登陆</button>
+    </form>
+{% endblock %}
