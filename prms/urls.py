@@ -13,7 +13,9 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
+from django.conf import settings
 from django.conf.urls import url, include
+from django.conf.urls.static import static
 from django.contrib import admin
 
 from management import views as management_views, urls as management_urls
@@ -23,3 +25,7 @@ urlpatterns = [
     url(r'^management/', include(management_urls)),
     url(r'^admin/', admin.site.urls),
 ]
+
+# 上传文件需要开启
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

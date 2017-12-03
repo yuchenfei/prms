@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block extrahead %}
+    <link href="/static/bootstrap-table.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block extrascript %}
+    <script src="/static/bootstrap-table.min.js"></script>
+    <script src="/static/bootstrap-table-zh-CN.min.js"></script>
+{% endblock %}
+
+{% block content %}
+    <table data-toggle="table"
+           data-url="{% url 'table_postgraduate_list' %}"
+           data-pagination="true"
+           data-side-pagination="server"
+           data-page-list="[10, 20, 50, 100, 200]"
+           data-page-size=20
+           data-search="true" data-mobile-responsive="true"
+           data-show-refresh="true" data-show-columns="true"
+           data-unique-id="postgraduate_id"
+    >
+        <thead>
+        <tr>
+            <th data-field="postgraduate_id" data-sortable="true">学号</th>
+            <th data-field="postgraduate_name" data-sortable="true">姓名</th>
+            <th data-field="postgraduate_teacher">导师</th>
+            <th data-field="postgraduate_group">小组</th>
+        </tr>
+        </thead>
+    </table>
+{% endblock %}

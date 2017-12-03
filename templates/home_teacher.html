@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    teacher
+    <a href="{% url 'postgraduate_list' %}">研究生列表</a>
+    <a href="{% url 'import_postgraduate_list' %}">导入</a>
 {% endblock %}

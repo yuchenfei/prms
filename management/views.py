@@ -1,8 +1,16 @@
+import json
+
+from django.core.files.storage import FileSystemStorage
+from django.db.models import Q
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
+from openpyxl import load_workbook
 
 from management.forms import TeacherLoginForm, PostgraduateLoginForm
 from management.models import Teacher, Postgraduate
+
+UPLOAD_XLSX_FILE = "import_data.xlsx"
 
 
 def home(request):
@@ -72,6 +80,106 @@ def login(request):
 def teacher_home(request):
     teacher = __get_login_user(request)
     return render(request, 'home_teacher.html', {'teacher': teacher})
+
+
+def postgraduate_list(request):
+    teacher = __get_login_user(request)
+    return render(request, 'postgraduate_list.html', {'teacher': teacher})
+
+
+def table_postgraduate_list(request):
+    if request.method == 'GET':
+        limit = int(request.GET.get('limit'))
+        offset = int(request.GET.get('offset'))
+        search = request.GET.get('search')
+        sort_column = request.GET.get('sort')
+        order = request.GET.get('order')
+        teacher = __get_login_user(request)
+        if search:
+            postgraduates = teacher.postgraduate_set.filter(Q(id=search) | Q(name=search))  # 或查询需要试用django Q
+        else:
+            postgraduates = teacher.postgraduate_set.all()
+
+        if sort_column:
+            sort_column = sort_column.replace('postgraduate_', '')
+            if sort_column in ['id', 'name', 'teacher', 'group']:
+                if order == 'desc':
+                    sort_column = '-{}'.format(sort_column)
+                postgraduates = postgraduates.order_by(sort_column)
+
+        response_data = {'total': postgraduates.count(), 'rows': []}
+        for postgraduate in postgraduates:
+            response_data['rows'].append({
+                "postgraduate_id": postgraduate.id,
+                "postgraduate_name": postgraduate.name,
+                "postgraduate_teacher": postgraduate.teacher.username,
+                "postgraduate_group": postgraduate.group if postgraduate.group else "",
+            })
+
+        if not offset:
+            offset = 0
+        if not limit:
+            limit = 20
+        response_data['rows'] = response_data['rows'][offset:offset + limit]
+        return HttpResponse(json.dumps(response_data))
+
+
+def import_postgraduate_list(request):
+    teacher = __get_login_user(request)
+    response_data = {'teacher': teacher}
+    if request.method == 'POST' and request.FILES['excel']:
+        excel = request.FILES['excel']
+        fs = FileSystemStorage()
+        fs.save(UPLOAD_XLSX_FILE, excel)  # 暂存media文件夹中
+        response_data['upload_file'] = True
+    elif request.method == 'GET' and request.GET.get('confirm') == 'true':
+        fs = FileSystemStorage()
+        workbook = load_workbook(fs.path(UPLOAD_XLSX_FILE))
+        sheet_names = workbook.get_sheet_names()
+        worksheet = workbook.get_sheet_by_name(sheet_names[0])
+        rows = worksheet.rows
+        postgraduates = []
+        for row in rows:
+            line = [col.value for col in row]
+            if line[0] == "学号":
+                continue  # 跳过标题（TODO：以是否为数字作为判断）
+            postgraduates.append(Postgraduate(id=line[0],
+                                              name=line[1],
+                                              teacher=teacher))
+        Postgraduate.objects.bulk_create(postgraduates)
+        fs.delete(UPLOAD_XLSX_FILE)  # 删除暂存文件
+        return HttpResponse('OK')
+    return render(request, 'import_postgraduate_list.html', response_data)
+
+
+def table_uploaded_postgraduate_list(request):
+    if request.method == 'GET':
+        limit = int(request.GET.get('limit'))
+        offset = int(request.GET.get('offset'))
+
+        fs = FileSystemStorage()
+        workbook = load_workbook(fs.path(UPLOAD_XLSX_FILE))
+        sheet_names = workbook.get_sheet_names()
+        worksheet = workbook.get_sheet_by_name(sheet_names[0])
+        rows = worksheet.rows
+        response_data = {'total': 0, 'rows': []}
+        for row in rows:
+            line = [col.value for col in row]
+            if line[0] == "学号":
+                continue
+            # noinspection PyTypeChecker
+            response_data['rows'].append({
+                "postgraduate_id": line[0],
+                "postgraduate_name": line[1],
+            })
+
+        if not offset:
+            offset = 0
+        if not limit:
+            limit = 20
+        response_data['total'] = len(response_data['rows'])
+        response_data['rows'] = response_data['rows'][offset:offset + limit]
+        return HttpResponse(json.dumps(response_data))
 
 
 def postgraduate_home(request):
