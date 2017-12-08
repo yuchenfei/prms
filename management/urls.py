@@ -14,4 +14,6 @@ urlpatterns = [
         name='table_uploaded_postgraduate_list'),
     url(r'^postgraduate/login$', views.login, name='postgraduate_login'),
     url(r'^postgraduate/$', views.postgraduate_home, name='postgraduate_home'),
+    url(r'^check_in$', views.check_in, name='check_in'),
+    url(r'^show_check_in$', views.show_check_in, name='show_check_in'),
 ]

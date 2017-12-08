@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block extrahead %}
+    <script src="https://www.amcharts.com/lib/3/amcharts.js"></script>
+    <script src="https://www.amcharts.com/lib/3/serial.js"></script>
+    <script src="https://www.amcharts.com/lib/3/gantt.js"></script>
+    <script src="https://www.amcharts.com/lib/3/themes/light.js"></script>
+    <script src="https://www.amcharts.com/lib/3/plugins/export/export.min.js"></script>
+    <link rel="stylesheet" href="https://www.amcharts.com/lib/3/plugins/export/export.css" type="text/css" media="all"/>
+    <link rel="stylesheet" href="/static/chart.css">
+{% endblock %}
+
+{% block content %}
+    <div id="chartdiv"></div>
+{% endblock %}
+
+{% block extrascript %}
+    <script>
+        var chart = AmCharts.makeChart("chartdiv", {
+            "type": "gantt",
+            "theme": "light",
+            "marginRight": 70,
+            "period": "hh",
+            "dataDateFormat": "YYYY-MM-DD",
+            "balloonDateFormat": "JJ:NN",
+            "columnWidth": 0.5,
+            "valueAxis": {
+                "type": "date"
+            },
+            "brightnessStep": 10,
+            "graph": {
+                "fillAlphas": 1,
+                "balloonText": "<b>[[task]]</b>: [[open]] [[value]]"
+            },
+            "rotate": true,
+            "categoryField": "category",
+            "segmentsField": "segments",
+            "colorField": "color",
+            "startDate": "{{ startDate }}",
+            "startField": "start",
+            "endField": "end",
+            "durationField": "duration",
+            "dataProvider": [{
+                "category": "John",
+                "segments": [{
+                    "start": 7,
+                    "end": 10.5,
+                    "color": "#46615e",
+                    "task": "Task #1"
+                }, {
+                    "start": 13,
+                    "end": 17,
+                    "color": "#727d6f",
+                    "task": "Task #2"
+                }]
+            },{
+                "category": "Mack",
+                "segments": [{
+                    "start": 7.5,
+                    "end": 11,
+                    "color": "#46615e",
+                    "task": "Task #1"
+                }, {
+                    "start": 13,
+                    "end": 16.5,
+                    "color": "#727d6f",
+                    "task": "Task #2"
+                }]
+            }],
+            "valueScrollbar": {
+                "autoGridCount": true
+            },
+            "chartCursor": {
+                "cursorColor": "#55bb76",
+                "valueBalloonsEnabled": false,
+                "cursorAlpha": 0,
+                "valueLineAlpha": 0.5,
+                "valueLineBalloonEnabled": true,
+                "valueLineEnabled": true,
+                "zoomable": false,
+                "valueZoomable": true
+            },
+            "export": {
+                "enabled": false
+            }
+        });
+    </script>
+{% endblock %}

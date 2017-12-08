@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <a href="{% url 'postgraduate_list' %}">研究生列表</a>
-    <a href="{% url 'import_postgraduate_list' %}">导入</a>
+    <ul>
+        <li><a href="{% url 'postgraduate_list' %}">研究生列表</a></li>
+        <li><a href="{% url 'import_postgraduate_list' %}">导入</a></li>
+        <li><a href="{% url 'check_in' %}">签到调试</a></li>
+        <li><a href="{% url 'show_check_in' %}">签到情况</a></li>
+    </ul>
 {% endblock %}

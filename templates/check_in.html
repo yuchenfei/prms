@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>签到功能调试页面</h2>
+    <form action="" method="post">
+        {% csrf_token %}
+        <input type="text" name="postgraduate">
+        <input type="submit" value="签到">
+    </form>
+{% endblock %}
