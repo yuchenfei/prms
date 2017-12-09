@@ -4,7 +4,7 @@
     <link href="/static/login.css" rel="stylesheet">
 {% endblock %}
 
-{% block content %}
+{% block content-fluid %}
     <form class="form-login" action="{{ url }}" method="post">
         <h2 class="form-login-heading">请{{ user_type }}登录系统</h2>
         {% csrf_token %}

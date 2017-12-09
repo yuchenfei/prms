@@ -1,12 +1,17 @@
 {% extends 'base.html' %}
 
-{% block content %}
-    <ul>
-        <li><a href="{% url 'postgraduate_list' %}">研究生列表</a></li>
-        <li><a href="{% url 'import_postgraduate_list' %}">导入</a></li>
-        <li><a href="{% url 'check_in' %}">签到调试</a></li>
-        <li><a href="{% url 'show_check_in' %}">签到情况</a></li>
-        <li><a href="{% url 'leave_list' %}">请假管理</a></li>
-        <li><a href="">查看小结</a></li>
+{% block navigation_bar %}
+    <ul class="nav nav-pills nav-stacked">
+        <li role="presentation" class="active"><a href="{% url 'teacher_home' %}">首页</a></li>
+        <li role="presentation"><a href="{% url 'postgraduate_list' %}">研究生列表</a></li>
+        <li role="presentation"><a href="{% url 'import_postgraduate_list' %}">导入</a></li>
+        <li role="presentation"><a href="{% url 'check_in' %}">签到调试</a></li>
+        <li role="presentation"><a href="{% url 'show_check_in' %}">签到情况</a></li>
+        <li role="presentation"><a href="{% url 'leave_list' %}">请假管理</a></li>
+        <li role="presentation"><a href="">查看小结</a></li>
     </ul>
+{% endblock %}
+
+{% block content %}
+    <h2>最新的消息。。。</h2>
 {% endblock %}

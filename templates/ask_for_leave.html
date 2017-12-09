@@ -20,6 +20,14 @@
     </script>
 {% endblock %}
 
+{% block navigation_bar %}
+    <ul class="nav nav-pills nav-stacked">
+        <li role="presentation"><a href="{% url 'postgraduate_home' %}">首页</a></li>
+        <li role="presentation" class="active"><a href="{% url 'ask_for_leave' %}">请假申请</a></li>
+        <li role="presentation"><a href="">提交小结</a></li>
+    </ul>
+{% endblock %}
+
 {% block content %}
     <h2>请假申请</h2>
     <form class="form" action="" method="post">
