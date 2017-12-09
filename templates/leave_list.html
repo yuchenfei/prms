@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% for leave in leave_set %}
+        <div class="panel panel-default">
+            <div class="panel-heading">{{ leave.postgraduate.name }}</div>
+            <div class="panel-body">
+                请假日期：{{ leave.date }}<br>
+                请假理由：{{ leave.excuse }}
+            </div>
+            <div class="panel-footer">提交时间：{{ leave.time_of_submission }}</div>
+        </div>
+    {% endfor %}
+
+{% endblock %}

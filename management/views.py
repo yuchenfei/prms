@@ -7,7 +7,7 @@ from django.urls import reverse
 from openpyxl import load_workbook
 
 from management.forms import TeacherLoginForm, PostgraduateLoginForm
-from management.models import Teacher, Postgraduate, CheckIn
+from management.models import Teacher, Postgraduate, CheckIn, Leave
 
 UPLOAD_XLSX_FILE = "import_data.xlsx"
 
@@ -143,6 +143,7 @@ def import_postgraduate_list(request):
             if line[0] == "学号":
                 continue  # 跳过标题（TODO：以是否为数字作为判断）
             postgraduates.append(Postgraduate(id=line[0],
+                                              password='123',
                                               name=line[1],
                                               teacher=teacher))
         Postgraduate.objects.bulk_create(postgraduates)
@@ -222,6 +223,37 @@ def show_check_in(request):
     response_data = {'teacher': teacher}
     response_data['startDate'] = datetime.now().date().strftime("%Y-%m-%d")
     return render(request, 'show_check_in.html', response_data)
+
+
+def ask_for_leave(request):
+    postgraduate = __get_login_user(request)
+    response_data = {'postgraduate': postgraduate}
+    if request.method == 'POST':
+        date = request.POST.get('date')
+        excuse = request.POST.get('excuse')
+        date = datetime.strptime(date, '%Y-%m-%d').date()
+        # TODO:是否重复
+        Leave.objects.create(
+            postgraduate=postgraduate,
+            date=date,
+            excuse=excuse,
+            time_of_submission=datetime.now()
+        )
+        return HttpResponse('提交成功！')
+    return render(request, 'ask_for_leave.html', response_data)
+
+
+def leave_list(request):
+    teacher = __get_login_user(request)
+    response_data = {'teacher': teacher}
+    postgraduates = teacher.postgraduate_set.all()
+    leaves = Leave.objects.filter(state=None).all()
+    leave_set = set()
+    for leave in leaves:
+        if leave.postgraduate in postgraduates:
+            leave_set.add(leave)
+    response_data['leave_set'] = leave_set
+    return render(request, 'leave_list.html', response_data)
 
 
 def __get_login_user(request):

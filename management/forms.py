@@ -44,7 +44,7 @@ class PostgraduateLoginForm(forms.Form):
         error_messages={'required': '密码不能为空'},
         widget=forms.TextInput(
             attrs={
-                'class': "form-control",
+                'class': 'form-control',
                 'placeholder': '输入密码',
             }
         ),

@@ -38,3 +38,16 @@ class CheckIn(models.Model):
 
     def __str__(self):
         return self.postgraduate.name + self.date.strftime(" %Y-%m-%d")
+
+
+class Leave(models.Model):
+    postgraduate = models.ForeignKey('Postgraduate')
+    date = models.DateField()
+    excuse = models.TextField()
+    state = models.NullBooleanField(null=True)
+    time_of_submission = models.DateTimeField()
+    time_of_processing = models.DateTimeField(blank=True, null=True)
+
+
+# class Brief(models.Model):
+#     pass

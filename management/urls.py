@@ -12,8 +12,12 @@ urlpatterns = [
     url(r'^teacher/import_postgraduate_list$', views.import_postgraduate_list, name='import_postgraduate_list'),
     url(r'^teacher/table_uploaded_postgraduate_list$', views.table_uploaded_postgraduate_list,
         name='table_uploaded_postgraduate_list'),
+    url(r'^teacher/show_check_in$', views.show_check_in, name='show_check_in'),
+    url(r'^teacher/leave_list', views.leave_list, name='leave_list'),
+
     url(r'^postgraduate/login$', views.login, name='postgraduate_login'),
     url(r'^postgraduate/$', views.postgraduate_home, name='postgraduate_home'),
+    url(r'^postgraduate/ask_for_leave$', views.ask_for_leave, name='ask_for_leave'),
+
     url(r'^check_in$', views.check_in, name='check_in'),
-    url(r'^show_check_in$', views.show_check_in, name='show_check_in'),
 ]
