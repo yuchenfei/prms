@@ -23,12 +23,13 @@
 {% endblock %}
 
 {% block content %}
+    <button>今天</button>
     <div id="chartdiv"></div>
 {% endblock %}
 
 {% block extrascript %}
     <script>
-        var chart = AmCharts.makeChart("chartdiv", {
+        config = {
             "type": "gantt",
             "theme": "light",
             "marginRight": 70,
@@ -48,37 +49,11 @@
             "categoryField": "category",
             "segmentsField": "segments",
             "colorField": "color",
-            "startDate": "{{ startDate }}",
+            "startDate": "",  //需要设置
             "startField": "start",
             "endField": "end",
             "durationField": "duration",
-            "dataProvider": [{
-                "category": "John",
-                "segments": [{
-                    "start": 7,
-                    "end": 10.5,
-                    "color": "#46615e",
-                    "task": "Task #1"
-                }, {
-                    "start": 13,
-                    "end": 17,
-                    "color": "#727d6f",
-                    "task": "Task #2"
-                }]
-            }, {
-                "category": "Mack",
-                "segments": [{
-                    "start": 7.5,
-                    "end": 11,
-                    "color": "#46615e",
-                    "task": "Task #1"
-                }, {
-                    "start": 13,
-                    "end": 16.5,
-                    "color": "#727d6f",
-                    "task": "Task #2"
-                }]
-            }],
+            "dataProvider": [],  // 传递数据
             "valueScrollbar": {
                 "autoGridCount": true
             },
@@ -95,6 +70,19 @@
             "export": {
                 "enabled": false
             }
+        };
+
+        function setChartData() {
+            $.getJSON("{% url 'show_check_in' %}?date=today", function (data) {
+                console.log(data);
+                config.startDate = data.startDate;
+                config.dataProvider = data.data;
+                var chart = AmCharts.makeChart("chartdiv", config);
+            });
+        }
+
+        $(document).ready(function () {
+            setChartData();
         });
     </script>
 {% endblock %}

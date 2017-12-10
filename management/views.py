@@ -221,8 +221,35 @@ def check_in(request):
 def show_check_in(request):
     teacher = __get_login_user(request)
     response_data = {'teacher': teacher}
-    response_data['startDate'] = datetime.now().date().strftime("%Y-%m-%d")
-    return render(request, 'show_check_in.html', response_data)
+    if request.method == 'GET':
+        date = request.GET.get('date')
+        if date is not None:
+            json_data = {}
+            if date == 'today':
+                date = datetime.now().date()
+                json_data['startDate'] = date.strftime("%Y-%m-%d")
+            check_in_set = CheckIn.objects.filter(date=date).filter(postgraduate__teacher=teacher).all()
+            json_data['data'] = []
+            for record in check_in_set:
+                json_data['data'].append(
+                    {
+                        "category": record.postgraduate.name,
+                        "segments": [{
+                            "start": __time_to_float(record.forenoon_in),
+                            "end": __time_to_float(record.forenoon_out),
+                            "color": "#46615e",
+                            "task": "上午"
+                        }, {
+                            "start": __time_to_float(record.afternoon_in),
+                            "end": __time_to_float(record.afternoon_out),
+                            "color": "#727d6f",
+                            "task": "下午"
+                        }]
+                    }
+                )
+            return JsonResponse(json_data)
+        else:
+            return render(request, 'show_check_in.html', response_data)
 
 
 def ask_for_leave(request):
@@ -265,3 +292,7 @@ def __get_login_user(request):
     if user_type == 'postgraduate':
         _id = request.session.get('user')
         return Postgraduate.objects.get(id=_id)
+
+
+def __time_to_float(time):
+    return time.hour + time.minute / 100.0
