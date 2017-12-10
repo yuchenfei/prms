@@ -1,3 +1,5 @@
+import time
+
 from datetime import datetime
 from django.core.files.storage import FileSystemStorage
 from django.db.models import Q
@@ -233,18 +235,11 @@ def show_check_in(request):
             for record in check_in_set:
                 json_data['data'].append(
                     {
-                        "category": record.postgraduate.name,
-                        "segments": [{
-                            "start": __time_to_float(record.forenoon_in),
-                            "end": __time_to_float(record.forenoon_out),
-                            "color": "#46615e",
-                            "task": "上午"
-                        }, {
-                            "start": __time_to_float(record.afternoon_in),
-                            "end": __time_to_float(record.afternoon_out),
-                            "color": "#727d6f",
-                            "task": "下午"
-                        }]
+                        'name': record.postgraduate.name,
+                        'forenoon_in': to_js_date(record.date, record.forenoon_in),
+                        'forenoon_out': to_js_date(record.date, record.forenoon_out),
+                        'afternoon_in': to_js_date(record.date, record.afternoon_in),
+                        'afternoon_out': to_js_date(record.date, record.afternoon_out)
                     }
                 )
             return JsonResponse(json_data)
@@ -294,5 +289,6 @@ def __get_login_user(request):
         return Postgraduate.objects.get(id=_id)
 
 
-def __time_to_float(time):
-    return time.hour + time.minute / 100.0
+def to_js_date(d, t):
+    dt = datetime.combine(d, t)
+    return int(time.mktime(dt.timetuple())) * 1000

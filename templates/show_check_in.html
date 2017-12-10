@@ -76,7 +76,24 @@
             $.getJSON("{% url 'show_check_in' %}?date=today", function (data) {
                 console.log(data);
                 config.startDate = data.startDate;
-                config.dataProvider = data.data;
+                for (var i in data.data) {
+                    console.log(data.data[i]);
+                    console.log(new Date(data.data[i].forenoon_in));
+                    config.dataProvider.push({
+                        "category": data.data[i].name,
+                        "segments": [{
+                            "start": new Date(data.data[i].forenoon_in),
+                            "end": new Date(data.data[i].forenoon_out),
+                            "color": "#46615e",
+                            "task": "上午"
+                        }, {
+                            "start": new Date(data.data[i].afternoon_in),
+                            "end": new Date(data.data[i].afternoon_out),
+                            "color": "#727d6f",
+                            "task": "下午"
+                        }]
+                    });
+                }
                 var chart = AmCharts.makeChart("chartdiv", config);
             });
         }
