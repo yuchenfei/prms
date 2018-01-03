@@ -22,6 +22,7 @@ class Postgraduate(models.Model):
 
 class Group(models.Model):
     name = models.CharField(max_length=100, unique=True)
+    # TODO：leader = models.ForeignKey('Teacher')
     members = models.ManyToManyField('Teacher')
 
     def __str__(self):
@@ -47,7 +48,6 @@ class Leave(models.Model):
     state = models.NullBooleanField(null=True)
     time_of_submission = models.DateTimeField()
     time_of_processing = models.DateTimeField(blank=True, null=True)
-
 
 # class Brief(models.Model):
 #     pass

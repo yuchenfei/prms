@@ -17,10 +17,24 @@
         <div class="panel panel-default">
             <div class="panel-heading">{{ leave.postgraduate.name }}</div>
             <div class="panel-body">
+                提交时间：{{ leave.time_of_submission }}<br>
                 请假日期：{{ leave.date }}<br>
                 请假理由：{{ leave.excuse }}
             </div>
-            <div class="panel-footer">提交时间：{{ leave.time_of_submission }}</div>
+            <div class="panel-footer">
+                {% if leave.state is None %}
+                    <button>批准</button>
+                    <button>拒绝</button>
+                {% else %}
+                    状态：
+                    {% if leave.state %}
+                        批准
+                    {% else %}
+                        拒绝
+                    {% endif %}
+                    处理时间：{{ leave.time_of_processing }}
+                {% endif %}
+            </div>
         </div>
     {% endfor %}
 
