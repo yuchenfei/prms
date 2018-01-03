@@ -1,15 +1,12 @@
-import time
-
-from datetime import datetime
 from django.core.files.storage import FileSystemStorage
 from django.db.models import Q
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from openpyxl import load_workbook
 
-from management.forms import TeacherLoginForm, PostgraduateLoginForm
-from management.models import Teacher, Postgraduate, CheckIn, Leave
+from account.forms import TeacherLoginForm, PostgraduateLoginForm
+from account.models import Teacher, Postgraduate
 
 UPLOAD_XLSX_FILE = "import_data.xlsx"
 
@@ -23,19 +20,6 @@ def home(request):
         if isinstance(login_user, Postgraduate):
             return redirect('postgraduate_home')
     return render(request, 'home.html')
-
-
-def choose_login_type(request):
-    return render(request, 'choose_login_type.html')
-
-
-def logout(request):
-    try:
-        del request.session['type']
-        del request.session['user']
-    except KeyError:
-        pass
-    return redirect('home')
 
 
 def login(request):
@@ -76,6 +60,15 @@ def login(request):
                     return redirect('postgraduate_home')
         data['form'] = form
     return render(request, 'login.html', data)
+
+
+def logout(request):
+    try:
+        del request.session['type']
+        del request.session['user']
+    except KeyError:
+        pass
+    return redirect('home')
 
 
 def teacher_home(request):
@@ -189,95 +182,6 @@ def postgraduate_home(request):
     return render(request, 'home_postgraduate.html', {'postgraduate': postgraduate})
 
 
-def check_in(request):
-    if request.method == 'GET':
-        return render(request, 'check_in.html')
-    else:
-        postgraduate = Postgraduate.objects.get(id=request.POST.get('postgraduate'))
-        records = CheckIn.objects.filter(date=datetime.now().date(), postgraduate=postgraduate)
-        if records:
-            record = records[0]
-            changed = False
-            current_time = datetime.now().time()
-            if record.forenoon_out is None:
-                record.forenoon_out = current_time
-                changed = True
-            elif record.afternoon_in is None:
-                record.afternoon_in = current_time
-                changed = True
-            elif record.afternoon_out is None:
-                record.afternoon_out = current_time
-                changed = True
-            if changed:
-                record.save()
-                return redirect('check_in')
-            else:
-                return HttpResponse('今日签到已完成！')
-        else:
-            record = CheckIn.objects.create(postgraduate=postgraduate, date=datetime.now().date())
-        record.forenoon_in = datetime.now().time()
-        record.save()
-        return redirect('check_in')
-
-
-def show_check_in(request):
-    teacher = __get_login_user(request)
-    response_data = {'teacher': teacher}
-    if request.method == 'GET':
-        date = request.GET.get('date')
-        if date is not None:
-            json_data = {}
-            if date == 'today':
-                date = datetime.now().date()
-                json_data['startDate'] = date.strftime("%Y-%m-%d")
-            check_in_set = CheckIn.objects.filter(date=date).filter(postgraduate__teacher=teacher).all()
-            json_data['data'] = []
-            for record in check_in_set:
-                json_data['data'].append(
-                    {
-                        'name': record.postgraduate.name,
-                        'forenoon_in': to_js_date(record.date, record.forenoon_in),
-                        'forenoon_out': to_js_date(record.date, record.forenoon_out),
-                        'afternoon_in': to_js_date(record.date, record.afternoon_in),
-                        'afternoon_out': to_js_date(record.date, record.afternoon_out)
-                    }
-                )
-            return JsonResponse(json_data)
-        else:
-            return render(request, 'show_check_in.html', response_data)
-
-
-def ask_for_leave(request):
-    postgraduate = __get_login_user(request)
-    response_data = {'postgraduate': postgraduate}
-    if request.method == 'POST':
-        date = request.POST.get('date')
-        excuse = request.POST.get('excuse')
-        date = datetime.strptime(date, '%Y-%m-%d').date()
-        # TODO:是否重复
-        Leave.objects.create(
-            postgraduate=postgraduate,
-            date=date,
-            excuse=excuse,
-            time_of_submission=datetime.now()
-        )
-        return HttpResponse('提交成功！')
-    return render(request, 'ask_for_leave.html', response_data)
-
-
-def leave_list(request):
-    teacher = __get_login_user(request)
-    response_data = {'teacher': teacher}
-    postgraduates = teacher.postgraduate_set.all()
-    leaves = Leave.objects.filter(state=None).all()
-    leave_set = set()
-    for leave in leaves:
-        if leave.postgraduate in postgraduates:
-            leave_set.add(leave)
-    response_data['leave_set'] = leave_set
-    return render(request, 'leave_list.html', response_data)
-
-
 def __get_login_user(request):
     """返回已登陆的用户实例"""
     user_type = request.session.get('type')
@@ -287,8 +191,3 @@ def __get_login_user(request):
     if user_type == 'postgraduate':
         _id = request.session.get('user')
         return Postgraduate.objects.get(id=_id)
-
-
-def to_js_date(d, t):
-    dt = datetime.combine(d, t)
-    return int(time.mktime(dt.timetuple())) * 1000

@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 
 {% block content-fluid %}
-    <h2>请登录系统</h2>
+    <a class="btn btn-lg btn-primary" href="{% url 'teacher_login' %}">教师</a>
+    <a class="btn btn-lg btn-primary" href="{% url 'postgraduate_login' %}">研究生</a>
 {% endblock %}

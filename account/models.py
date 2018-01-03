@@ -27,27 +27,3 @@ class Group(models.Model):
 
     def __str__(self):
         return self.name
-
-
-class CheckIn(models.Model):
-    postgraduate = models.ForeignKey('Postgraduate')
-    date = models.DateField()
-    forenoon_in = models.TimeField(blank=True, null=True)
-    forenoon_out = models.TimeField(blank=True, null=True)
-    afternoon_in = models.TimeField(blank=True, null=True)
-    afternoon_out = models.TimeField(blank=True, null=True)
-
-    def __str__(self):
-        return self.postgraduate.name + self.date.strftime(" %Y-%m-%d")
-
-
-class Leave(models.Model):
-    postgraduate = models.ForeignKey('Postgraduate')
-    date = models.DateField()
-    excuse = models.TextField()
-    state = models.NullBooleanField(null=True)
-    time_of_submission = models.DateTimeField()
-    time_of_processing = models.DateTimeField(blank=True, null=True)
-
-# class Brief(models.Model):
-#     pass
