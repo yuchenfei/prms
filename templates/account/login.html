@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'account/base.html' %}
 
 {% block extrahead %}
     <link href="/static/login.css" rel="stylesheet">
@@ -11,4 +11,7 @@
         {{ form }}
         <button class="btn btn-lg btn-primary btn-block" type="submit">登陆</button>
     </form>
+{% endblock %}
+
+{% block navigation_bar %}
 {% endblock %}

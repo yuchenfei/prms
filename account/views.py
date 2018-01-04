@@ -19,7 +19,7 @@ def home(request):
             return redirect('teacher_home')
         if isinstance(login_user, Postgraduate):
             return redirect('postgraduate_home')
-    return render(request, 'home.html')
+    return render(request, 'account/home.html')
 
 
 def login(request):
@@ -59,7 +59,7 @@ def login(request):
                     request.session['user'] = postgraduate.id
                     return redirect('postgraduate_home')
         data['form'] = form
-    return render(request, 'login.html', data)
+    return render(request, 'account/login.html', data)
 
 
 def logout(request):
@@ -73,12 +73,12 @@ def logout(request):
 
 def teacher_home(request):
     teacher = __get_login_user(request)
-    return render(request, 'home_teacher.html', {'teacher': teacher})
+    return render(request, 'account/home_teacher.html', {'teacher': teacher})
 
 
 def postgraduate_list(request):
     teacher = __get_login_user(request)
-    return render(request, 'postgraduate_list.html', {'teacher': teacher})
+    return render(request, 'account/postgraduate_list.html', {'teacher': teacher})
 
 
 def table_postgraduate_list(request):
@@ -144,7 +144,7 @@ def import_postgraduate_list(request):
         Postgraduate.objects.bulk_create(postgraduates)
         fs.delete(UPLOAD_XLSX_FILE)  # 删除暂存文件
         return HttpResponse('OK')
-    return render(request, 'import_postgraduate_list.html', response_data)
+    return render(request, 'account/import_postgraduate_list.html', response_data)
 
 
 def table_uploaded_postgraduate_list(request):
@@ -179,7 +179,7 @@ def table_uploaded_postgraduate_list(request):
 
 def postgraduate_home(request):
     postgraduate = __get_login_user(request)
-    return render(request, 'home_postgraduate.html', {'postgraduate': postgraduate})
+    return render(request, 'account/home_postgraduate.html', {'postgraduate': postgraduate})
 
 
 def __get_login_user(request):
