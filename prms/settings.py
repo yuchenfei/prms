@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'account.apps.AccountConfig',
+    'checkin.apps.CheckinConfig',
+    'leave.apps.LeaveConfig',
 ]
 
 MIDDLEWARE = [

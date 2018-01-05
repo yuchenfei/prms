@@ -14,29 +14,19 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 from django.conf import settings
-from django.conf.urls import url
+from django.conf.urls import url, include
 from django.conf.urls.static import static
 from django.contrib import admin
 
-from account import views as account_views
+from account import urls as account_urls
+from checkin import urls as checkin_urls
+from leave import urls as leave_urls
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),  # 管理后台
-    url(r'^$', account_views.home, name='home'),  # 主页选择登陆类型
-    url(r'^logout$', account_views.logout, name='logout'),  # 登出
-
-    url(r'^teacher/login$', account_views.login, name='teacher_login'),  # 教师登陆
-    url(r'^teacher/$', account_views.teacher_home, name='teacher_home'),
-    url(r'^teacher/postgraduates$', account_views.postgraduate_list, name='postgraduate_list'),
-    url(r'^teacher/table_postgraduate_list$', account_views.table_postgraduate_list, name='table_postgraduate_list'),
-    url(r'^teacher/import_postgraduate_list$', account_views.import_postgraduate_list, name='import_postgraduate_list'),
-    url(r'^teacher/table_uploaded_postgraduate_list$', account_views.table_uploaded_postgraduate_list,
-        name='table_uploaded_postgraduate_list'),
-
-    url(r'^postgraduate/login$', account_views.login, name='postgraduate_login'),  # 研究生登陆
-    url(r'^postgraduate/$', account_views.postgraduate_home, name='postgraduate_home'),
-
-
+    url(r'^', include(account_urls)),
+    url(r'^', include(checkin_urls)),
+    url(r'^', include(leave_urls)),
 ]
 
 # 上传文件需要开启
