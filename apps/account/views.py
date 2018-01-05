@@ -1,3 +1,5 @@
+import functools
+
 from django.core.files.storage import FileSystemStorage
 from django.db.models import Q
 from django.http import JsonResponse, HttpResponse
@@ -5,64 +7,66 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from openpyxl import load_workbook
 
-from account.forms import TeacherLoginForm, PostgraduateLoginForm
-from account.models import Teacher, Postgraduate
+from .forms import TeacherLoginForm, PostgraduateLoginForm
+from .models import Teacher, Postgraduate
+from .verification import verify_teacher_by_password, verify_postgraduate_by_password
 
 UPLOAD_XLSX_FILE = "import_data.xlsx"
 
 
-def home(request):
-    """用户已登陆则跳转至对应主页"""
-    login_user = __get_login_user(request)
-    if login_user is not None:
-        if isinstance(login_user, Teacher):
-            return redirect('teacher_home')
-        if isinstance(login_user, Postgraduate):
-            return redirect('postgraduate_home')
-    return render(request, 'account/home.html')
+def login_required(func):
+    @functools.wraps(func)
+    def wrapper(request, *args, **kw):
+        if request.session.has_key('user') and request.session['user']:
+            return func(request, *args, **kw)
+        else:
+            return redirect('login')
+
+    return wrapper
 
 
 def login(request):
     """教师、研究生登陆逻辑"""
-    data = {}
+    response_data = dict()
     # 教师登陆
     if request.path == reverse('teacher_login'):
-        data['url'] = reverse('teacher_login')
-        data['user_type'] = '教师'
-        if request.method == 'GET':
-            form = TeacherLoginForm()
-        else:
+        response_data['url'] = reverse('teacher_login')
+        response_data['user_type'] = '教师'
+        if request.method == 'POST':
             form = TeacherLoginForm(request.POST)
             if form.is_valid():
-                username = request.POST.get('username', '')
-                password = request.POST.get('password', '')
-                teacher = Teacher.objects.get(username=username)
-                if teacher.password == password:
+                teacher = verify_teacher_by_password(form.cleaned_data['username'], form.cleaned_data['password'])
+                if teacher:
                     request.session['type'] = 'teacher'
                     request.session['user'] = teacher.username
                     return redirect('teacher_home')
-        data['form'] = form
+                else:
+                    form.add_error(None, '密码错误')
+        else:
+            form = TeacherLoginForm()
+        response_data['form'] = form
     # 研究生登陆
     if request.path == reverse('postgraduate_login'):
-        data['url'] = reverse('postgraduate_login')
-        data['user_type'] = '研究生'
-        if request.method == 'GET':
-            form = PostgraduateLoginForm()
-        else:
+        response_data['url'] = reverse('postgraduate_login')
+        response_data['user_type'] = '研究生'
+        if request.method == 'POST':
             form = PostgraduateLoginForm(request.POST)
             if form.is_valid():
-                _id = request.POST.get('id', '')
-                password = request.POST.get('password', '')
-                postgraduate = Postgraduate.objects.get(id=_id)
-                if postgraduate.password == password:
+                postgraduate = verify_postgraduate_by_password(form.cleaned_data['id'], form.cleaned_data['password'])
+                if postgraduate:
                     request.session['type'] = 'postgraduate'
                     request.session['user'] = postgraduate.id
                     return redirect('postgraduate_home')
-        data['form'] = form
-    return render(request, 'account/login.html', data)
+                else:
+                    form.add_error(None, '密码错误')
+        else:
+            form = PostgraduateLoginForm()
+        response_data['form'] = form
+    return render(request, 'account/login.html', response_data)
 
 
 def logout(request):
+    """教师、研究生登出逻辑"""
     try:
         del request.session['type']
         del request.session['user']
@@ -71,16 +75,41 @@ def logout(request):
     return redirect('home')
 
 
+def get_login_user(request):
+    """返回已登陆的用户实例"""
+    user_type = request.session.get('type')
+    if user_type == 'teacher':
+        username = request.session.get('user')
+        return Teacher.objects.get(username=username)
+    if user_type == 'postgraduate':
+        _id = request.session.get('user')
+        return Postgraduate.objects.get(id=_id)
+
+
+def home(request):
+    """用户已登陆则跳转至对应主页"""
+    login_user = get_login_user(request)
+    if login_user is not None:
+        if isinstance(login_user, Teacher):
+            return redirect('teacher_home')
+        if isinstance(login_user, Postgraduate):
+            return redirect('postgraduate_home')
+    return render(request, 'account/home.html')
+
+
+@login_required
 def teacher_home(request):
-    teacher = __get_login_user(request)
+    teacher = get_login_user(request)
     return render(request, 'account/home_teacher.html', {'teacher': teacher})
 
 
+@login_required
 def postgraduate_list(request):
-    teacher = __get_login_user(request)
+    teacher = get_login_user(request)
     return render(request, 'account/postgraduate_list.html', {'teacher': teacher})
 
 
+@login_required
 def table_postgraduate_list(request):
     if request.method == 'GET':
         limit = int(request.GET.get('limit'))
@@ -88,7 +117,7 @@ def table_postgraduate_list(request):
         search = request.GET.get('search')
         sort_column = request.GET.get('sort')
         order = request.GET.get('order')
-        teacher = __get_login_user(request)
+        teacher = get_login_user(request)
         if search:
             postgraduates = teacher.postgraduate_set.filter(Q(id=search) | Q(name=search))  # 或查询需要试用django Q
         else:
@@ -118,8 +147,9 @@ def table_postgraduate_list(request):
         return JsonResponse(response_data)
 
 
+@login_required
 def import_postgraduate_list(request):
-    teacher = __get_login_user(request)
+    teacher = get_login_user(request)
     response_data = {'teacher': teacher}
     if request.method == 'POST' and request.FILES['excel']:
         excel = request.FILES['excel']
@@ -147,6 +177,7 @@ def import_postgraduate_list(request):
     return render(request, 'account/import_postgraduate_list.html', response_data)
 
 
+@login_required
 def table_uploaded_postgraduate_list(request):
     if request.method == 'GET':
         limit = int(request.GET.get('limit'))
@@ -177,17 +208,7 @@ def table_uploaded_postgraduate_list(request):
         return JsonResponse(response_data)
 
 
+@login_required
 def postgraduate_home(request):
-    postgraduate = __get_login_user(request)
+    postgraduate = get_login_user(request)
     return render(request, 'account/home_postgraduate.html', {'postgraduate': postgraduate})
-
-
-def __get_login_user(request):
-    """返回已登陆的用户实例"""
-    user_type = request.session.get('type')
-    if user_type == 'teacher':
-        username = request.session.get('user')
-        return Teacher.objects.get(username=username)
-    if user_type == 'postgraduate':
-        _id = request.session.get('user')
-        return Postgraduate.objects.get(id=_id)

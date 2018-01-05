@@ -3,7 +3,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 
 from account.models import Postgraduate
-from account.views import __get_login_user
+from account.views import get_login_user
 from checkin.models import CheckIn
 
 
@@ -39,7 +39,7 @@ def check_in(request):
 
 
 def show_check_in(request):
-    teacher = __get_login_user(request)
+    teacher = get_login_user(request)
     response_data = {'teacher': teacher}
     if request.method == 'GET':
         date = request.GET.get('date')

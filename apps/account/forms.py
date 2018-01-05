@@ -1,5 +1,7 @@
 from django import forms
 
+from .models import Teacher, Postgraduate
+
 
 class TeacherLoginForm(forms.Form):
     username = forms.CharField(
@@ -17,13 +19,25 @@ class TeacherLoginForm(forms.Form):
         required=True,
         label=False,
         error_messages={'required': '密码不能为空'},
-        widget=forms.TextInput(
+        widget=forms.PasswordInput(
             attrs={
                 'class': "form-control",
                 'placeholder': '输入密码',
             }
         ),
     )
+
+    def clean(self):
+        username = self.cleaned_data['username']
+        is_username_exist = Teacher.objects.filter(username=username).exists()
+        if not is_username_exist:
+            raise forms.ValidationError('用户名不存在')
+
+        password = self.cleaned_data['password']
+        if len(password) < 6:
+            raise forms.ValidationError('密码至少为6位')
+
+        return self.cleaned_data
 
 
 class PostgraduateLoginForm(forms.Form):
@@ -42,10 +56,22 @@ class PostgraduateLoginForm(forms.Form):
         required=True,
         label=False,
         error_messages={'required': '密码不能为空'},
-        widget=forms.TextInput(
+        widget=forms.PasswordInput(
             attrs={
                 'class': 'form-control',
                 'placeholder': '输入密码',
             }
         ),
     )
+
+    def clean(self):
+        id = self.cleaned_data['id']
+        is_postgraduate_exist = Postgraduate.objects.filter(id=id).exists()
+        if not is_postgraduate_exist:
+            raise forms.ValidationError('学号不存在')
+
+        password = self.cleaned_data['password']
+        if len(password) < 6:
+            raise forms.ValidationError('密码至少为6位')
+
+        return self.cleaned_data

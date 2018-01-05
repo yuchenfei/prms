@@ -2,12 +2,12 @@ from datetime import datetime
 from django.http import HttpResponse
 from django.shortcuts import render
 
-from account.views import __get_login_user
+from account.views import get_login_user
 from leave.models import Leave
 
 
 def ask_for_leave(request):
-    postgraduate = __get_login_user(request)
+    postgraduate = get_login_user(request)
     response_data = {'postgraduate': postgraduate}
     if request.method == 'POST':
         date = request.POST.get('date')
@@ -25,7 +25,7 @@ def ask_for_leave(request):
 
 
 def leave_list(request):
-    teacher = __get_login_user(request)
+    teacher = get_login_user(request)
     response_data = {'teacher': teacher}
     postgraduates = teacher.postgraduate_set.all()
     leaves = Leave.objects.filter(state=None).all()
