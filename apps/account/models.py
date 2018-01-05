@@ -13,6 +13,10 @@ class Teacher(models.Model):
     def __str__(self):
         return self.username
 
+    @property
+    def is_leader(self):
+        return self.group_leader.filter(leader=self).exists()
+
 
 class Postgraduate(models.Model):
     id = models.CharField(max_length=30, primary_key=True, verbose_name='学号')
@@ -27,13 +31,13 @@ class Postgraduate(models.Model):
         verbose_name_plural = '研究生'
 
     def __str__(self):
-        return self.name
+        return '(' + self.id + ')' + self.name
 
 
 class Group(models.Model):
     name = models.CharField(max_length=100, unique=True, verbose_name='组名')
     leader = models.ForeignKey('Teacher', related_name='group_leader', verbose_name='组长')
-    members = models.ManyToManyField('Teacher', related_name='group_members', verbose_name='教师组成')
+    members = models.ManyToManyField('Teacher', blank=True, related_name='group_members', verbose_name='教师组成')
 
     class Meta:
         verbose_name = '小组'
