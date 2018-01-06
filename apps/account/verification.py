@@ -12,8 +12,8 @@ def verify_teacher_by_password(username, password):
         return None
 
 
-def verify_postgraduate_by_password(id, password):
-    postgraduate = Postgraduate.objects.get(id=id)
+def verify_postgraduate_by_password(pid, password):
+    postgraduate = Postgraduate.objects.get(pid=pid)
     password = hashlib.pbkdf2_hmac('sha256', str.encode(password), str.encode(postgraduate.salt), 100000).hex()
     if password == postgraduate.password:
         return postgraduate

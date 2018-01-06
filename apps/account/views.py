@@ -52,10 +52,10 @@ def login(request):
         if request.method == 'POST':
             form = PostgraduateLoginForm(request.POST)
             if form.is_valid():
-                postgraduate = verify_postgraduate_by_password(form.cleaned_data['id'], form.cleaned_data['password'])
+                postgraduate = verify_postgraduate_by_password(form.cleaned_data["pid"], form.cleaned_data['password'])
                 if postgraduate:
                     request.session['type'] = 'postgraduate'
-                    request.session['user'] = postgraduate.id
+                    request.session['user'] = postgraduate.pid
                     return redirect('postgraduate_home')
                 else:
                     form.add_error(None, '密码错误')
@@ -82,8 +82,8 @@ def get_login_user(request):
         username = request.session.get('user')
         return Teacher.objects.get(username=username)
     if user_type == 'postgraduate':
-        _id = request.session.get('user')
-        return Postgraduate.objects.get(id=_id)
+        pid = request.session.get('user')
+        return Postgraduate.objects.get(pid=pid)
 
 
 def home(request):
@@ -133,7 +133,7 @@ def table_postgraduate_list(request):
         response_data = {'total': postgraduates.count(), 'rows': []}
         for postgraduate in postgraduates:
             response_data['rows'].append({
-                "postgraduate_id": postgraduate.id,
+                "postgraduate_id": postgraduate.pid,
                 "postgraduate_name": postgraduate.name,
                 "postgraduate_teacher": postgraduate.teacher.username,
                 "postgraduate_group": postgraduate.group if postgraduate.group else "",

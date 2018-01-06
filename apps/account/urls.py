@@ -7,6 +7,9 @@ urlpatterns = [
     url(r'^logout$', views.logout, name='logout'),  # 登出
     url(r'^teacher/login$', views.login, name='teacher_login'),  # 教师登陆
     url(r'^teacher/$', views.teacher_home, name='teacher_home'),
+
+    # url(r'^teacher/group_list'),
+
     url(r'^teacher/postgraduates$', views.postgraduate_list, name='postgraduate_list'),
     url(r'^teacher/table_postgraduate_list$', views.table_postgraduate_list, name='table_postgraduate_list'),
     url(r'^teacher/import_postgraduate_list$', views.import_postgraduate_list, name='import_postgraduate_list'),

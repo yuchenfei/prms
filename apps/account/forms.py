@@ -41,7 +41,7 @@ class TeacherLoginForm(forms.Form):
 
 
 class PostgraduateLoginForm(forms.Form):
-    id = forms.CharField(
+    pid = forms.CharField(
         required=True,
         label=False,
         error_messages={'required': '学号不能为空'},
@@ -65,8 +65,8 @@ class PostgraduateLoginForm(forms.Form):
     )
 
     def clean(self):
-        id = self.cleaned_data['id']
-        is_postgraduate_exist = Postgraduate.objects.filter(id=id).exists()
+        pid = self.cleaned_data["pid"]
+        is_postgraduate_exist = Postgraduate.objects.filter(pid=pid).exists()
         if not is_postgraduate_exist:
             raise forms.ValidationError('学号不存在')
 
