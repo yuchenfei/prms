@@ -30,7 +30,7 @@ class PostgraduateAdmin(admin.ModelAdmin):
 
 
 class GroupAdmin(admin.ModelAdmin):
-    pass
+    filter_horizontal = ('teacher_member',)
 
 
 admin.site.register(Teacher, TeacherAdmin)

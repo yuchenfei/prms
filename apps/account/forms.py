@@ -1,6 +1,7 @@
 from django import forms
+from django.contrib.admin.widgets import FilteredSelectMultiple
 
-from .models import Teacher, Postgraduate
+from .models import Teacher, Postgraduate, Group
 
 
 class TeacherLoginForm(forms.Form):
@@ -75,3 +76,24 @@ class PostgraduateLoginForm(forms.Form):
             raise forms.ValidationError('密码至少为6位')
 
         return self.cleaned_data
+
+
+class GroupTeacherMemberForm(forms.ModelForm):
+    teacher_member = forms.ModelMultipleChoiceField(
+        queryset=Teacher.objects.filter(lead_group=None).all(),  # 过滤非组长的教师
+        required=False,
+        widget=FilteredSelectMultiple("教师", is_stacked=False),
+    )
+
+    def __init__(self, teacher=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        group = Group.objects.get(leader=teacher)
+        self.fields['teacher_member'].initial = Teacher.objects.filter(group=group).all()
+
+    class Media:
+        css = {'all': ('/static/admin/css/widgets.css',), }
+        js = ('/admin/jsi18n/',)
+
+    class Meta:
+        model = Group
+        fields = ('teacher_member',)

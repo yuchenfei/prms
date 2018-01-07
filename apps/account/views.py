@@ -7,8 +7,8 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from openpyxl import load_workbook
 
-from .forms import TeacherLoginForm, PostgraduateLoginForm
-from .models import Teacher, Postgraduate
+from .forms import TeacherLoginForm, PostgraduateLoginForm, GroupTeacherMemberForm
+from .models import Teacher, Postgraduate, Group
 from .verification import verify_teacher_by_password, verify_postgraduate_by_password
 
 UPLOAD_XLSX_FILE = "import_data.xlsx"
@@ -101,6 +101,24 @@ def home(request):
 def teacher_home(request):
     teacher = get_login_user(request)
     return render(request, 'account/home_teacher.html', {'teacher': teacher})
+
+
+@login_required
+def manage_group_teacher(request):
+    """组长管理组成员"""
+    response_data = dict()
+    response_data['teacher'] = teacher = get_login_user(request)
+    if request.method == 'POST':
+        form = GroupTeacherMemberForm(data=request.POST, teacher=teacher)
+        if form.is_valid():
+            group = Group.objects.filter(leader=teacher).first()
+            print(form.cleaned_data['teacher_member'])
+            group.teacher_member = form.cleaned_data['teacher_member']
+            group.save()
+    else:
+        form = GroupTeacherMemberForm(teacher=teacher)
+    response_data['form'] = form
+    return render(request, 'account/manage_group_teacher.html', response_data)
 
 
 @login_required
