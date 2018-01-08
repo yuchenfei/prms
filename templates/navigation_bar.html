@@ -3,6 +3,7 @@
         <li role="presentation"><a href="{% url 'teacher_home' %}">首页</a></li>
         {% if teacher.is_leader %}
             <li role="presentation"><a href="{% url 'manage_group_teacher' %}">小组教师管理</a></li>
+            <li role="presentation"><a href="{% url 'manage_group_postgraduate' %}">小组研究生管理</a></li>
         {% endif %}
         <li role="presentation"><a href="{% url 'postgraduate_list' %}">研究生列表</a></li>
         <li role="presentation"><a href="{% url 'import_postgraduate_list' %}">导入</a></li>

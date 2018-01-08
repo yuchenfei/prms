@@ -2,29 +2,68 @@
 
 
 {% block content %}
-    {% for leave in leave_set %}
+    {% for leave in leave_list %}
         <div class="panel panel-default">
-            <div class="panel-heading">{{ leave.postgraduate.name }}</div>
+            <div class="panel-heading clearfix">
+                <div class="panel-title pull-left">{{ leave.postgraduate.name }}</div>
+                <div class="pull-right">提交时间：{{ leave.time_of_submission }}</div>
+            </div>
             <div class="panel-body">
-                提交时间：{{ leave.time_of_submission }}<br>
                 请假日期：{{ leave.date }}<br>
                 请假理由：{{ leave.excuse }}
             </div>
             <div class="panel-footer">
                 {% if leave.state is None %}
-                    <button>批准</button>
-                    <button>拒绝</button>
+                    <form action="{% url 'processes_leave' leave.id %}" method="post">
+                        {% csrf_token %}
+                        <input type="text" name="result" hidden>
+                        <input type="button" class="btn btn-success" value="批准">
+                        <input type="button" class="btn btn-danger" value="拒绝">
+                    </form>
                 {% else %}
-                    状态：
                     {% if leave.state %}
-                        批准
+                        <span class="label label-success" role="alert">已批准</span>
                     {% else %}
-                        拒绝
+                        <span class="label label-danger" role="alert">已回拒</span>
                     {% endif %}
-                    处理时间：{{ leave.time_of_processing }}
+                    <div class="pull-right">处理时间：{{ leave.time_of_processing }}</div>
                 {% endif %}
             </div>
         </div>
     {% endfor %}
+    <form name="show_all" method="get">
+        <input type="text" name="show_all" value="true" hidden>
+    </form>
+    <a href="#" id="show_all_link" onclick="show()">显示已批复的记录</a>
+{% endblock %}
 
+{% block extrascript %}
+    <script>
+        function show() {
+            $("form[name='show_all']").submit();
+        }
+
+        function getUrlParam(name) {
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
+            var r = window.location.search.substr(1).match(reg);  //匹配目标参数
+            if (r != null) return r[2];
+            return null; //返回参数值
+        }
+
+        $(document).ready(function () {
+            $("input:button").click(function () {
+                var form = $(this).parent("form");
+                var result = form.find("input[name='result']");
+                if ($(this).val() === '批准') {
+                    result.val('approve');
+                } else {
+                    result.val('reject');
+                }
+                form.submit();
+            });
+
+            if (getUrlParam('show_all') === 'true')
+                $("#show_all_link").hide();
+        })
+    </script>
 {% endblock %}

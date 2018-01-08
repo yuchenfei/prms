@@ -7,7 +7,7 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from openpyxl import load_workbook
 
-from .forms import TeacherLoginForm, PostgraduateLoginForm, GroupTeacherMemberForm
+from .forms import TeacherLoginForm, PostgraduateLoginForm, GroupTeacherMemberForm, GroupPostgraduateMemberForm
 from .models import Teacher, Postgraduate, Group
 from .verification import verify_teacher_by_password, verify_postgraduate_by_password
 
@@ -112,13 +112,28 @@ def manage_group_teacher(request):
         form = GroupTeacherMemberForm(data=request.POST, teacher=teacher)
         if form.is_valid():
             group = Group.objects.filter(leader=teacher).first()
-            print(form.cleaned_data['teacher_member'])
             group.teacher_member = form.cleaned_data['teacher_member']
             group.save()
     else:
         form = GroupTeacherMemberForm(teacher=teacher)
     response_data['form'] = form
     return render(request, 'account/manage_group_teacher.html', response_data)
+
+
+@login_required
+def manage_group_postgraduate(request):
+    response_data = dict()
+    response_data['teacher'] = teacher = get_login_user(request)
+    if request.method == 'POST':
+        form = GroupPostgraduateMemberForm(data=request.POST, teacher=teacher)
+        if form.is_valid():
+            for postgraduate in form.cleaned_data['postgraduate_member']:
+                postgraduate.group = teacher.lead_group
+                postgraduate.save()
+    else:
+        form = GroupPostgraduateMemberForm(teacher=teacher)
+    response_data['form'] = form
+    return render(request, 'account/manage_group_postgraduate.html', response_data)
 
 
 @login_required

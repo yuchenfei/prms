@@ -97,3 +97,21 @@ class GroupTeacherMemberForm(forms.ModelForm):
     class Meta:
         model = Group
         fields = ('teacher_member',)
+
+
+class GroupPostgraduateMemberForm(forms.Form):
+    postgraduate_member = forms.ModelMultipleChoiceField(
+        queryset=Postgraduate.objects.all(),
+        required=False,
+        widget=FilteredSelectMultiple("研究生", is_stacked=False),
+    )
+
+    def __init__(self, teacher=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        group = Group.objects.get(leader=teacher)
+        self.initial['postgraduate_member'] = Postgraduate.objects.filter(group=group).all()
+        print(self.initial['postgraduate_member'])
+
+    class Media:
+        css = {'all': ('/static/admin/css/widgets.css',), }
+        js = ('/admin/jsi18n/',)
