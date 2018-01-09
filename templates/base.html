@@ -23,7 +23,7 @@
                     </form>
                 </li>
             {% elif postgraduate != None %}
-                <li><p class="navbar-text">{{ postgraduate.id }} 已登陆</p></li>
+                <li><p class="navbar-text">{{ postgraduate.name }} 已登陆</p></li>
                 <li>
                     <form action="{% url 'logout' %}">
                         <button type="submit" class="btn btn-default navbar-btn">登出</button>
