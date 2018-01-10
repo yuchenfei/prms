@@ -78,7 +78,7 @@ class PostgraduateLoginForm(forms.Form):
         return self.cleaned_data
 
 
-class GroupTeacherMemberForm(forms.ModelForm):
+class GroupTeacherMemberForm(forms.Form):
     teacher_member = forms.ModelMultipleChoiceField(
         queryset=Teacher.objects.filter(lead_group=None).all(),  # 过滤非组长的教师
         required=False,
@@ -93,7 +93,3 @@ class GroupTeacherMemberForm(forms.ModelForm):
     class Media:
         css = {'all': ('/static/admin/css/widgets.css',), }
         js = ('/admin/jsi18n/',)
-
-    class Meta:
-        model = Group
-        fields = ('teacher_member',)

@@ -9,7 +9,7 @@ urlpatterns = [
     url(r'^teacher/$', views.teacher_home, name='teacher_home'),
 
     url(r'^teacher/manage_group_teacher$', views.manage_group_teacher, name='manage_group_teacher'),
-    url(r'^teacher/import_teacher', views.import_teacher, name='import_teacher'),
+    # url(r'^teacher/import_teacher', views.import_teacher, name='import_teacher'),
 
     url(r'^teacher/postgraduates$', views.postgraduate_list, name='postgraduate_list'),
     url(r'^teacher/table_postgraduate_list$', views.table_postgraduate_list, name='table_postgraduate_list'),

@@ -7,7 +7,7 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from openpyxl import load_workbook
 
-from .forms import TeacherLoginForm, PostgraduateLoginForm, GroupTeacherMemberForm, GroupPostgraduateMemberForm
+from .forms import TeacherLoginForm, PostgraduateLoginForm, GroupTeacherMemberForm
 from .models import Teacher, Postgraduate, Group
 from .verification import verify_teacher_by_password, verify_postgraduate_by_password
 
@@ -111,9 +111,10 @@ def manage_group_teacher(request):
     if request.method == 'POST':
         form = GroupTeacherMemberForm(data=request.POST, teacher=teacher)
         if form.is_valid():
-            group = Group.objects.filter(leader=teacher).first()
-            group.teacher_member = form.cleaned_data['teacher_member']
-            group.save()
+            group = Group.objects.get(leader=teacher)
+            for t in form.cleaned_data['teacher_member']:
+                t.group = group
+                t.save()
     else:
         form = GroupTeacherMemberForm(teacher=teacher)
     response_data['form'] = form
@@ -153,7 +154,6 @@ def table_postgraduate_list(request):
                 "postgraduate_id": postgraduate.pid,
                 "postgraduate_name": postgraduate.name,
                 "postgraduate_teacher": postgraduate.teacher.username,
-                "postgraduate_group": postgraduate.group if postgraduate.group else "",
             })
 
         if not offset:

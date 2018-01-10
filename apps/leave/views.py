@@ -32,7 +32,7 @@ def leave_list(request):
     response_data['teacher'] = teacher = get_login_user(request)
     if teacher.is_leader:
         group = Group.objects.get(leader=teacher)
-        postgraduates = Postgraduate.objects.filter(Q(teacher=teacher) | Q(group=group)).all()
+        postgraduates = Postgraduate.objects.filter(Q(teacher=teacher) | Q(teacher__group=group)).all()
     else:
         postgraduates = Postgraduate.objects.filter(teacher=teacher).all()
     if request.GET.get('show_all') == 'true':
