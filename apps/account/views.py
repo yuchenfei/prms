@@ -121,22 +121,6 @@ def manage_group_teacher(request):
 
 
 @login_required
-def manage_group_postgraduate(request):
-    response_data = dict()
-    response_data['teacher'] = teacher = get_login_user(request)
-    if request.method == 'POST':
-        form = GroupPostgraduateMemberForm(data=request.POST, teacher=teacher)
-        if form.is_valid():
-            for postgraduate in form.cleaned_data['postgraduate_member']:
-                postgraduate.group = teacher.lead_group
-                postgraduate.save()
-    else:
-        form = GroupPostgraduateMemberForm(teacher=teacher)
-    response_data['form'] = form
-    return render(request, 'account/manage_group_postgraduate.html', response_data)
-
-
-@login_required
 def postgraduate_list(request):
     teacher = get_login_user(request)
     return render(request, 'account/postgraduate_list.html', {'teacher': teacher})
