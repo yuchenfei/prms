@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block extrahead %}
+    {% load staticfiles %}
+    <link href="{% static 'bootstrap-table/css/bootstrap-table.min.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block extrascript %}
+    <script src="{% static 'bootstrap-table/js/bootstrap-table.min.js' %}"></script>
+    <script src="{% static 'bootstrap-table/js/locales/bootstrap-table-zh-CN.min.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    <form action="" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="excel">
+        <input class="btn btn-default" type="submit" value="上传">
+    </form>
+    {% if upload_file %}
+        <table data-toggle="table"
+               data-url="{% url 'table_uploaded_teacher_list' %}?upload_file={{ upload_file }}"
+               data-pagination="true"
+               data-side-pagination="server"
+               data-page-list="[10, 20, 50, 100, 200]"
+               data-page-size=20
+               data-show-refresh="true" data-show-columns="true"
+               data-unique-id="postgraduate_id"
+        >
+            <thead>
+            <tr>
+                <th data-field="teacher_username">用户名</th>
+            </tr>
+            </thead>
+        </table>
+        <form action="" method="get">
+            {% csrf_token %}
+            <input type="hidden" name="confirm" value="true">
+            <input type="hidden" name="upload_file" value="{{ upload_file }}">
+            <input type="submit" value="确认">
+        </form>
+    {% endif %}
+{% endblock %}

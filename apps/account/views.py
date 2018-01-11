@@ -7,6 +7,7 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from openpyxl import load_workbook
 
+from .admin import create_password
 from .forms import TeacherLoginForm, PostgraduateLoginForm, GroupTeacherMemberForm
 from .models import Teacher, Postgraduate, Group
 from .verification import verify_teacher_by_password, verify_postgraduate_by_password
@@ -184,10 +185,12 @@ def import_postgraduate_list(request):
             line = [col.value for col in row]
             if line[0] == "学号":
                 continue  # 跳过标题（TODO：以是否为数字作为判断）
-            postgraduates.append(Postgraduate(id=line[0],
-                                              password='123',
-                                              name=line[1],
-                                              teacher=teacher))
+            postgraduate = Postgraduate(pid=line[0],
+                                        password='123456',
+                                        name=line[1],
+                                        teacher=teacher)
+            create_password(postgraduate)
+            postgraduates.append(postgraduate)
         Postgraduate.objects.bulk_create(postgraduates)
         fs.delete(UPLOAD_XLSX_FILE)  # 删除暂存文件
         return HttpResponse('OK')
@@ -216,6 +219,65 @@ def table_uploaded_postgraduate_list(request):
                 "postgraduate_name": line[1],
             })
 
+        if not offset:
+            offset = 0
+        if not limit:
+            limit = 20
+        response_data['total'] = len(response_data['rows'])
+        response_data['rows'] = response_data['rows'][offset:offset + limit]
+        return JsonResponse(response_data)
+
+
+@login_required
+def import_teacher(request):
+    response_data = dict()
+    response_data['teacher'] = teacher = get_login_user(request)
+    group = Group.objects.get(leader=teacher)
+    if request.method == 'POST' and request.FILES['excel']:
+        excel = request.FILES['excel']
+        fs = FileSystemStorage()
+        fs.save(UPLOAD_XLSX_FILE, excel)  # 暂存media文件夹中
+        response_data['upload_file'] = True
+    elif request.method == 'GET' and request.GET.get('confirm') == 'true':
+        fs = FileSystemStorage()
+        workbook = load_workbook(fs.path(UPLOAD_XLSX_FILE))
+        sheet_names = workbook.get_sheet_names()
+        worksheet = workbook.get_sheet_by_name(sheet_names[0])
+        rows = worksheet.rows
+        teachers = []
+        for row in rows:
+            line = [col.value for col in row]
+            if line[0] == "用户名":
+                continue  # 跳过标题（TODO：以是否为数字作为判断）
+            t = Teacher(username=line[0], password='123456', group=group)
+            create_password(t)
+            teachers.append(t)
+        Teacher.objects.bulk_create(teachers)
+        fs.delete(UPLOAD_XLSX_FILE)  # 删除暂存文件
+        return HttpResponse('OK')
+    return render(request, 'account/import_teacher_list.html', response_data)
+
+
+@login_required
+def table_uploaded_teacher_list(request):
+    if request.method == 'GET':
+        limit = int(request.GET.get('limit'))
+        offset = int(request.GET.get('offset'))
+
+        fs = FileSystemStorage()
+        workbook = load_workbook(fs.path(UPLOAD_XLSX_FILE))
+        sheet_names = workbook.get_sheet_names()
+        worksheet = workbook.get_sheet_by_name(sheet_names[0])
+        rows = worksheet.rows
+        response_data = {'total': 0, 'rows': []}
+        for row in rows:
+            line = [col.value for col in row]
+            if line[0] == "用户名":
+                continue
+            # noinspection PyTypeChecker
+            response_data['rows'].append({
+                "teacher_username": line[0],
+            })
         if not offset:
             offset = 0
         if not limit:
