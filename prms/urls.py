@@ -21,12 +21,14 @@ from django.contrib import admin
 from account import urls as account_urls
 from checkin import urls as checkin_urls
 from leave import urls as leave_urls
+from group_file import url as group_file_urls
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),  # 管理后台
     url(r'^', include(account_urls)),
     url(r'^', include(checkin_urls)),
     url(r'^', include(leave_urls)),
+    url(r'^', include(group_file_urls)),
 ]
 
 # 上传文件需要开启

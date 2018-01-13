@@ -5,11 +5,13 @@
             <li role="presentation"><a href="{% url 'manage_group_teacher' %}">小组教师管理</a></li>
             <li role="presentation"><a href="{% url 'import_teacher' %}">导入教师</a></li>
         {% endif %}
+        <li role="presentation"><a href="{% url 'leave_list' %}">请假管理</a></li>
+        <li role="presentation"><a href="{% url 'group_file_list' %}">课题组文件列表</a></li>
+        <li role="presentation"><a href="{% url 'group_file_upload' %}">课题组文件上传</a></li>
         <li role="presentation"><a href="{% url 'postgraduate_list' %}">研究生列表</a></li>
         <li role="presentation"><a href="{% url 'import_postgraduate_list' %}">导入学生</a></li>
         <li role="presentation"><a href="{% url 'check_in' %}">签到调试</a></li>
         <li role="presentation"><a href="{% url 'show_check_in' %}">签到情况</a></li>
-        <li role="presentation"><a href="{% url 'leave_list' %}">请假管理</a></li>
         <li role="presentation"><a href="123">查看小结</a></li>
     </ul>
 {% elif request.path|slice:'13' == '/postgraduate' %}

@@ -30,7 +30,11 @@ class PostgraduateAdmin(admin.ModelAdmin):
 
 
 class GroupAdmin(admin.ModelAdmin):
-    pass
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        leader = obj.leader
+        leader.group = obj
+        leader.save()
 
 
 admin.site.register(Teacher, TeacherAdmin)

@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>课题组文件列表</h2>
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">序号</th>
+            <th scope="col">标题</th>
+            <th scope="col">描述</th>
+            <th scope="col">上传者</th>
+            <th scope="col">上传时间</th>
+            <th scope="col">操作</th>
+        </tr>
+        </thead>
+        {% for file in file_list %}
+            <tr>
+                <th scope="row">{{ forloop.counter }}</th>
+                <td>{{ file.title }}</td>
+                <td>{{ file.describe }}</td>
+                <td>{{ file.owner }} </td>
+                <td>{{ file.date }} </td>
+                <td><a href="{{ file.file.url }}">下载</a></td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}
