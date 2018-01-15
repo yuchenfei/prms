@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'checkin.apps.CheckinConfig',
     'leave.apps.LeaveConfig',
     'group_file.apps.GroupFileConfig',
+    'brief.apps.BriefConfig',
 ]
 
 MIDDLEWARE = [

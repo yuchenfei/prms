@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% for brief in brief_list %}
+        <div class="panel panel-default">
+            <div class="panel-heading clearfix">
+                <div class="panel-title pull-left">{{ brief.submitter.name }}</div>
+                <div class="pull-right">
+                    {{ brief.date }}
+                </div>
+            </div>
+            <div class="panel-body">
+                {{ brief.content|truncatechars:"100" }}
+            </div>
+            <div class="panel-footer clearfix">
+                {% if brief.have_read %}
+                    <span class="label label-success" role="alert">已阅</span>
+                {% else %}
+                    <span class="label label-warning" role="alert">未查看</span>
+                {% endif %}
+                <div class="pull-right">
+                    <button class="btn btn-default" onclick="window.open('{% url 'brief_review_t' brief.id %}')">查看
+                    </button>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+{% endblock %}

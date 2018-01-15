@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>小结</h2>
+    <form enctype="multipart/form-data" method="post">
+        {% csrf_token %}
+        {{ form }}
+        <input type="submit" name="save" value="保存">
+        <input type="submit" name="commit" value="提交">
+    </form>
+{% endblock %}

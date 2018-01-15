@@ -12,12 +12,13 @@
         <li role="presentation"><a href="{% url 'import_postgraduate_list' %}">导入学生</a></li>
         <li role="presentation"><a href="{% url 'check_in' %}">签到调试</a></li>
         <li role="presentation"><a href="{% url 'show_check_in' %}">签到情况</a></li>
-        <li role="presentation"><a href="123">查看小结</a></li>
+        <li role="presentation"><a href="{% url 'brief_list_t' %}">查看小结</a></li>
     </ul>
 {% elif request.path|slice:'13' == '/postgraduate' %}
     <ul class="nav nav-pills nav-stacked">
         <li role="presentation"><a href="{% url 'postgraduate_home' %}">首页</a></li>
         <li role="presentation"><a href="{% url 'ask_for_leave' %}">请假申请</a></li>
-        <li role="presentation"><a href="123">提交小结</a></li>
+        <li role="presentation"><a href="{% url 'brief_list_p' %}">小结列表</a></li>
+        <li role="presentation"><a href="{% url 'brief_new' %}">提交小结</a></li>
     </ul>
 {% endif %}
