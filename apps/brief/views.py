@@ -22,7 +22,7 @@ def brief_list_t(request):
     response_data = dict()
     response_data['teacher'] = teacher = get_login_user(request)
     postgraduates = Postgraduate.objects.filter(teacher=teacher).all()
-    response_data['brief_list'] = Brief.objects.filter(submitter__in=postgraduates).all()
+    response_data['brief_list'] = Brief.objects.filter(submitter__in=postgraduates, commit=True).all()
     return render(request, 'brief/brief_list_t.html', response_data)
 
 

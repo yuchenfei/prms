@@ -6,11 +6,6 @@
             <div class="panel-heading clearfix">
                 <div class="panel-title pull-left">{{ brief.date }}</div>
                 <div class="pull-right">
-                    {% if brief.commit %}
-                        已提交
-                    {% else %}
-                        未提交
-                    {% endif %}
                     <button class="btn btn-default" onclick="window.location.href='{% url 'brief_edit' brief.id %}'">
                         编辑
                     </button>
@@ -20,7 +15,9 @@
                 {{ brief.content|truncatechars:"100" }}
             </div>
             <div class="panel-footer clearfix">
-                {% if brief.have_read %}
+                {% if not brief.commit %}
+                    <span class="label label-warning" role="alert">未提交</span>
+                {% elif brief.have_read %}
                     <span class="label label-success" role="alert">已批阅</span>
                     <div class="pull-right">
                         <button class="btn btn-default"
@@ -29,7 +26,7 @@
                         </button>
                     </div>
                 {% else %}
-                    <span class="label label-warning" role="alert">未查看</span>
+                    <span class="label label-info" role="alert">未查看</span>
                 {% endif %}
             </div>
         </div>

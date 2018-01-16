@@ -23,3 +23,6 @@ class InstructionsForm(ModelForm):
         labels = {
             'instructions': '批注'
         }
+        widgets = {
+            'instructions': Textarea(attrs={'class': 'form-control'})
+        }

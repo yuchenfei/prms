@@ -11,13 +11,15 @@
         <br>
         <h2>批注</h2>
         {% if form %}
-            <form method="post">
+            <form class="form" method="post">
                 {% csrf_token %}
-                {{ form.instructions }}
-                <input type="submit" value="提交">
+                <div class="form-group">{{ form.instructions }}</div>
+                <div class="pull-right">
+                    <input class="btn btn-primary" type="submit" value="提交">
+                </div>
             </form>
         {% else %}
-            <p>{{ brief.instructions }}</p>
+            <p>{{ brief.instructions|default_if_none:"无" }}</p>
         {% endif %}
     </div>
 {% endblock %}
