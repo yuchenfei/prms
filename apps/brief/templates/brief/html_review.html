@@ -1,22 +1,23 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h2>{{ brief.submitter.name }} 小结</h2>
-    <h6>最后修改日期：{{ brief.date }}</h6>
-    <p>{{ brief.content|linebreaksbr }}</p>
-    {% if brief.file %}
-        附件：<a href="{{ brief.file.url }}">{{ brief.file.name }}</a>
-    {% endif %}
-    <br>
-    <h2>批注</h2>
-    {% if form %}
-        <form method="post">
-            {% csrf_token %}
-            {{ form.instructions }}
-            <input type="submit" value="提交">
-        </form>
-    {% else %}
-        <p>{{ brief.instructions }}</p>
-    {% endif %}
-
+    <div class="jumbotron">
+        <h2>{{ brief.submitter.name }} 小结</h2>
+        <h6>最后修改日期：{{ brief.date }}</h6>
+        <p>{{ brief.content|linebreaksbr }}</p>
+        {% if brief.file %}
+            附件：<a href="{{ brief.file.url }}">{{ brief.file.name }}</a>
+        {% endif %}
+        <br>
+        <h2>批注</h2>
+        {% if form %}
+            <form method="post">
+                {% csrf_token %}
+                {{ form.instructions }}
+                <input type="submit" value="提交">
+            </form>
+        {% else %}
+            <p>{{ brief.instructions }}</p>
+        {% endif %}
+    </div>
 {% endblock %}
