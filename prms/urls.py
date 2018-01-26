@@ -23,6 +23,7 @@ from checkin import urls as checkin_urls
 from leave import urls as leave_urls
 from group_file import url as group_file_urls
 from brief import url as brief_urls
+from api import urls as api_urls
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),  # 管理后台
@@ -31,6 +32,7 @@ urlpatterns = [
     url(r'^', include(leave_urls)),
     url(r'^', include(group_file_urls)),
     url(r'^', include(brief_urls)),
+    url(r'^api/', include(api_urls)),
 ]
 
 # 上传文件需要开启

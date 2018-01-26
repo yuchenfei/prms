@@ -26,7 +26,7 @@ SECRET_KEY = 'g1=^-(q%pufxsry!2w7aov5%c7*+3pst3$)0_qh2=gndv20uc*'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['192.168.10.223', '127.0.0.1']
 
 # Application definition
 
@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'leave.apps.LeaveConfig',
     'group_file.apps.GroupFileConfig',
     'brief.apps.BriefConfig',
+    'api.apps.ApiConfig',
 ]
 
 MIDDLEWARE = [
