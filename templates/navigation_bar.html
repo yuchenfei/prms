@@ -10,9 +10,10 @@
         <li role="presentation"><a href="{% url 'group_file_upload' %}">课题组文件上传</a></li>
         <li role="presentation"><a href="{% url 'postgraduate_list' %}">研究生列表</a></li>
         <li role="presentation"><a href="{% url 'import_postgraduate_list' %}">导入学生</a></li>
-        <li role="presentation"><a href="{% url 'check_in' %}">签到调试</a></li>
         <li role="presentation"><a href="{% url 'show_check_in' %}">签到情况</a></li>
         <li role="presentation"><a href="{% url 'brief_list_t' %}">查看小结</a></li>
+        <li role="presentation"><a href="{% url 'computer_list' %}">计算机管理</a></li>
+        <li role="presentation"><a href="{% url 'computer_add' %}">添加计算机</a></li>
     </ul>
 {% elif request.path|slice:'13' == '/postgraduate' %}
     <ul class="nav nav-pills nav-stacked">

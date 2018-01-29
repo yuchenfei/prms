@@ -1,10 +1,44 @@
 {% extends 'base.html' %}
 
-{% block content %}
-    <h2>签到功能调试页面</h2>
-    <form action="" method="post">
-        {% csrf_token %}
-        <input type="text" name="postgraduate">
-        <input type="submit" value="签到">
-    </form>
+{% block content-fluid %}
+    <h2>签到</h2>
+    <img src="" id="qr_code">
+{% endblock %}
+
+{% block extrascript %}
+    <script>
+        function getQR() {
+            var cpu_id = getCpuId();
+            if (!cpu_id) cpu_id = "";
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "{% url 'check_in' %}");
+            xhr.responseType = "blob";
+            xhr.onload = function () {
+                var objectURL = URL.createObjectURL(this.response);
+                var img = document.getElementById("qr_code");
+                img.src = objectURL;
+                img.height = 400;
+                img.onload = function (ev) {
+                    window.URL.revokeObjectURL(this.src);
+                };
+            };
+            xhr.send({cpu_id: cpu_id});
+        }
+
+        function getCpuId() {
+            try {
+                var locator = new ActiveXObject("WbemScripting.SWbemLocator");
+                var service = locator.ConnectServer(".");
+                var cpu = new Enumerator(service.ExecQuery("SELECT * FROM Win32_Processor")).item();
+            } catch (e) {
+                return null
+            }
+            return cpu.ProcessorID;
+        }
+
+        window.onload = function () {
+            setInterval(getQR, 1000);
+        }
+    </script>
 {% endblock %}

@@ -13,3 +13,8 @@ class CheckIn(models.Model):
 
     def __str__(self):
         return self.postgraduate.name + self.date.strftime(" %Y-%m-%d")
+
+
+class Computer(models.Model):
+    name = models.CharField(max_length=30, unique=True)
+    cpu_id = models.CharField(max_length=20, unique=True)

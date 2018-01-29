@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <table class="table">
+        <thead>
+        <tr>
+            <th colspan="col">序号</th>
+            <th colspan="col">名称</th>
+            <th colspan="col">CPU ID</th>
+        </tr>
+        </thead>
+        {% for computer in computer_list %}
+            <tr>
+                <th colspan="row">{{ forloop.counter }}</th>
+                <td>{{ computer.name }}</td>
+                <td>{{ computer.cpu_id }}</td>
+            </tr>
+        {% endfor %}
+
+    </table>
+{% endblock %}
+
