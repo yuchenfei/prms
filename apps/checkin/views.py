@@ -1,37 +1,22 @@
-import hashlib
-import random
 from datetime import datetime
-from os import urandom
 
 import qrcode
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
+from django.views.decorators.csrf import csrf_exempt
 from io import BytesIO
 
-from django.core.cache import cache
-from django.views.decorators.csrf import csrf_exempt
-
 from account.views import get_login_user
-from .models import CheckIn, Computer
-from .forms import ComputerForm
+from .check_in_code import CheckInCode
+from .models import DailyCheckIn, Computer, CheckInSetting
+from .forms import ComputerForm, CheckInSettingForm
 
 
 @csrf_exempt
 def check_in(request):
     if request.method == 'POST':
-        cpu_id = request.POST.get('cpu_id', '')
-
-        code = cache.get('qr_code', None)
-        if not code:
-            if cpu_id:
-                c = Computer.objects.get(cpu_id=cpu_id)
-                m = hashlib.sha256()
-                m.update(cpu_id.encode('utf-8'))
-                code = urandom(32).hex() + m.hexdigest() + str(c.id)
-            else:
-                code = urandom(64).hex()
-            print(code)
-            cache.set('qr_code', code, 30)
+        cpu_id = request.POST.get('cpu_id', None)
+        code, is_valid = CheckInCode(cpu_id=cpu_id).get_code()
 
         buf = BytesIO()
         img = qrcode.make(code)
@@ -40,33 +25,27 @@ def check_in(request):
     else:
         return render(request, 'checkin/check_in.html')
 
-    # else:
-    #     pass
-    # postgraduate = Postgraduate.objects.get(id=request.POST.get('postgraduate'))
-    # records = CheckIn.objects.filter(date=datetime.now().date(), postgraduate=postgraduate)
-    # if records:
-    #     record = records[0]
-    #     changed = False
-    #     current_time = datetime.now().time()
-    #     if record.forenoon_out is None:
-    #         record.forenoon_out = current_time
-    #         changed = True
-    #     elif record.afternoon_in is None:
-    #         record.afternoon_in = current_time
-    #         changed = True
-    #     elif record.afternoon_out is None:
-    #         record.afternoon_out = current_time
-    #         changed = True
-    #     if changed:
-    #         record.save()
-    #         return redirect('check_in')
-    #     else:
-    #         return HttpResponse('今日签到已完成！')
-    # else:
-    #     record = CheckIn.objects.create(postgraduate=postgraduate, date=datetime.now().date())
-    # record.forenoon_in = datetime.now().time()
-    # record.save()
-    # return redirect('check_in')
+
+def setting(request):
+    response_data = dict()
+    teacher = get_login_user(request)
+    response_data['teacher'] = teacher
+    if request.method == 'POST':
+        form = CheckInSettingForm(request.POST)
+        if form.is_valid():
+            check_in_setting = form.save(commit=False)
+            check_in_setting.teacher = teacher
+            check_in_setting.c_type = 2
+            check_in_setting.save()
+            redirect('check_in_setting')
+        else:
+            print(form.errors)
+    else:
+        form = CheckInSettingForm()
+    response_data['form'] = form
+    response_data['items'] = CheckInSetting.objects.filter(teacher=teacher,
+                                                           c_type=CheckInSetting.TYPE_CHOICES[1][0]).all()
+    return render(request, 'checkin/check_in_setting.html', response_data)
 
 
 def computer_list(request):
@@ -101,7 +80,7 @@ def show_check_in(request):
             if date == 'today':
                 date = datetime.now().date()
                 json_data['startDate'] = date.strftime("%Y-%m-%d")
-            check_in_set = CheckIn.objects.filter(date=date).filter(postgraduate__teacher=teacher).all()
+            check_in_set = DailyCheckIn.objects.filter(date=date).filter(postgraduate__teacher=teacher).all()
             json_data['data'] = []
             for record in check_in_set:
                 json_data['data'].append(

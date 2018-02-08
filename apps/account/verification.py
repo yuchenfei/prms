@@ -1,5 +1,7 @@
 import hashlib
 
+import jwt
+
 from account.models import Teacher, Postgraduate
 
 
@@ -18,4 +20,15 @@ def verify_postgraduate_by_password(pid, password):
     if password == postgraduate.password:
         return postgraduate
     else:
+        return None
+
+
+def verify_postgraduate_by_jwt(token):
+    try:
+        decoded = jwt.decode(token, 'secret', algorithm='HS256')
+        # token有效，检索用户信息
+        user = Postgraduate.objects.get(pid=decoded['sub'])
+        return user
+    except jwt.ExpiredSignatureError:
+        # token无效会捕获此异常
         return None

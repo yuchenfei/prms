@@ -14,6 +14,7 @@
         <li role="presentation"><a href="{% url 'brief_list_t' %}">查看小结</a></li>
         <li role="presentation"><a href="{% url 'computer_list' %}">计算机管理</a></li>
         <li role="presentation"><a href="{% url 'computer_add' %}">添加计算机</a></li>
+        <li role="presentation"><a href="{% url 'check_in_setting' %}">签到设置</a></li>
     </ul>
 {% elif request.path|slice:'13' == '/postgraduate' %}
     <ul class="nav nav-pills nav-stacked">

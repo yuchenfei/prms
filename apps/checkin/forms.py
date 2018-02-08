@@ -1,6 +1,6 @@
-from django.forms import ModelForm, TextInput, ValidationError, HiddenInput
+from django.forms import ModelForm, TextInput, ValidationError, HiddenInput, DateTimeInput
 
-from .models import Computer
+from .models import Computer, CheckInSetting
 
 
 class ComputerForm(ModelForm):
@@ -21,3 +21,17 @@ class ComputerForm(ModelForm):
         if Computer.objects.filter(cpu_id=cpu_id).exists():
             raise ValidationError('此计算机已录入')
         return self.cleaned_data
+
+
+class CheckInSettingForm(ModelForm):
+    class Meta:
+        model = CheckInSetting
+        fields = ('date_time', 'computer', 'enable')
+        labels = {
+            'date_time': '时间',
+            'computer': '指定计算机',
+            'enable': '使能'
+        }
+        widgets = {
+            'date_time': DateTimeInput(format='%Y-%m-%d %H:%M')
+        }

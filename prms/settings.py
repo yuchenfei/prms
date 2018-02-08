@@ -26,7 +26,7 @@ SECRET_KEY = 'g1=^-(q%pufxsry!2w7aov5%c7*+3pst3$)0_qh2=gndv20uc*'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.10.223', '127.0.0.1']
+ALLOWED_HOSTS = ['192.168.10.222', '127.0.0.1']
 
 # Application definition
 
@@ -115,7 +115,7 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+USE_TZ = False  # 设置为True时，数据库内存储的时UTC时间
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/

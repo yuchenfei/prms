@@ -7,12 +7,14 @@
 
 {% block extrascript %}
     <script>
-        function getQR() {
-            var cpu_id = getCpuId();
-            if (!cpu_id) cpu_id = "";
+        var cpu_id = "";
 
+        function getQR() {
             var xhr = new XMLHttpRequest();
-            xhr.open("POST", "{% url 'check_in' %}");
+            var url = "{% url 'check_in' %}";
+            var params = "cpu_id=".concat(cpu_id);
+            xhr.open("POST", url, true);
+            xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
             xhr.responseType = "blob";
             xhr.onload = function () {
                 var objectURL = URL.createObjectURL(this.response);
@@ -23,7 +25,7 @@
                     window.URL.revokeObjectURL(this.src);
                 };
             };
-            xhr.send({cpu_id: cpu_id});
+            xhr.send(params);
         }
 
         function getCpuId() {
@@ -38,6 +40,7 @@
         }
 
         window.onload = function () {
+            cpu_id = getCpuId();
             setInterval(getQR, 1000);
         }
     </script>
