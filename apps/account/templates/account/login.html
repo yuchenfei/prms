@@ -1,23 +1,46 @@
-{% extends 'base.html' %}
-
-{% block extrahead %}
+<!doctype html>
+<html class="login-bg" lang="cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>研究生科研管理系统 - 登录</title>
     {% load staticfiles %}
-    <link href="{% static 'login.css' %}" rel="stylesheet">
-{% endblock %}
-
-{% block content-fluid %}
-    <form class="form-login" action="{{ url }}" method="post">
-        <h2 class="form-login-heading">请{{ user_type }}登录系统</h2>
-        {% csrf_token %}
-        {% for field in form %}
-            {{ field }}
-        {% endfor %}
-        {% for error in form.non_field_errors %}
-            <div class="alert alert-danger">{{ error }}</div>
-        {% endfor %}
-        <button class="btn btn-lg btn-primary btn-block" type="submit">登陆</button>
-    </form>
-{% endblock %}
-
-{% block navigation_bar %}
-{% endblock %}
+    <!-- bootstrap -->
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+    <!-- this page specific styles -->
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col-xs-12 col-md-12">
+            <div class="login-wrapper">
+                <a href="/">
+                    <img class="logo" src="{% static 'img/logo.png' %}"/>
+                </a>
+                <div class="box">
+                    <div class="content-wrap">
+                        <h6>登录</h6>
+                        <form class="form-login" action="{{ url }}" method="post">
+                            {% csrf_token %}
+                            {% for field in form %}
+                                {{ field }}
+                            {% endfor %}
+                            {% for error in form.non_field_errors %}
+                                <div class="alert alert-danger">{{ error }}</div>
+                            {% endfor %}
+                            <button class="btn btn-primary login" type="submit">登陆</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- scripts -->
+<script src="http://code.jquery.com/jquery.min.js"></script>
+<script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+</body>
+</html>
