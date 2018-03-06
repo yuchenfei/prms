@@ -1,16 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>研究生科研管理系统</title>
+
+    <!-- bootstrap -->
     {% load staticfiles %}
     <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
-    <link href="{% static 'base.css' %}" rel="stylesheet">
+
+    <!-- global styles -->
+    <link href="{% static 'css/base.css' %}" rel="stylesheet">
+
     {% block extrahead %}{% endblock %}
-    <title>研究生科研管理系统</title>
 </head>
-<body>
+<body class="bg">
 <nav class="navbar navbar-default navbar-fixed-top">
     <div class="container">
         <a class="navbar-brand" href="/">
@@ -44,22 +50,27 @@
         </ul>
     </div>
 </nav>
-<div class="container">
-    <div class="row">
-        <div class="col-xs-12 col-md-12">{% block content-fluid %}{% endblock %}</div>
-    </div>
-    <div class="row">
-        <div class="col-xs-3 col-md-2">
-            {% block navigation_bar %}
-                {% include 'navigation_bar.html' %}
-            {% endblock %}
+{% block container %}
+    <div class="container bg-container">
+        <div class="row">
+            <div class="col-xs-12 col-md-12">{% block content-fluid %}{% endblock %}</div>
         </div>
-        <div class="col-xs-9 col-md-10">{% block content %}{% endblock %}</div>
+        <div class="row">
+            <div class="col-xs-3 col-md-2">
+                {% block navigation_bar %}
+                    {% include 'navigation_bar.html' %}
+                {% endblock %}
+            </div>
+            <div class="col-xs-9 col-md-10">{% block content %}{% endblock %}</div>
+        </div>
     </div>
-</div>
+{% endblock %}
+
+<!-- scripts -->
 <script src="http://code.jquery.com/jquery.min.js"></script>
-<script src="{% static 'add_active_navigation_class.js' %}"></script>
 <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+<script src="{% static 'js/add_active_navigation_class.js' %}"></script>
 {% block extrascript %}{% endblock %}
+
 </body>
 </html>

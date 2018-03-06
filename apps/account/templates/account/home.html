@@ -1,6 +1,25 @@
 {% extends 'base.html' %}
 
-{% block content-fluid %}
-    <a class="btn btn-lg btn-primary" href="{% url 'teacher_login' %}">教师</a>
-    <a class="btn btn-lg btn-primary" href="{% url 'postgraduate_login' %}">研究生</a>
+{% block extrahead %}
+    <!-- this page specific styles -->
+    {% load staticfiles %}
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
+{% block container %}
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12 col-md-12">
+                <div class="home-wrapper">
+                    <div class="box">
+                        <h6>请选择登录身份</h6>
+                        <div class="content-wrap">
+                            <a class="btn btn-lg btn-primary" href="{% url 'teacher_login' %}">教师</a>
+                            <a class="btn btn-lg btn-primary" href="{% url 'postgraduate_login' %}">研究生</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
