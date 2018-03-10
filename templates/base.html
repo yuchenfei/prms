@@ -52,7 +52,7 @@
     </div>
 </nav>
 {% block container %}
-    <div class="container bg-container">
+    <div id="box" class="container bg-container">
         <div class="row">
             <div class="col-xs-12 col-md-12">{% block content-fluid %}{% endblock %}</div>
         </div>
@@ -73,6 +73,18 @@
 {#<script src="{% static 'js/add_active_navigation_class.js' %}"></script>#}
 <script src="{% static 'js/index.js' %}"></script>
 {% block extrascript %}{% endblock %}
+
+<script>
+    // 暂时使用JS实现，内容较长时可能有bug
+    window.onload = function () {
+        function auto_height() {
+            document.getElementById("box").style.height = document.documentElement.clientHeight - 100 + "px";
+        }
+
+        auto_height();
+        onresize = auto_height;
+    }
+</script>
 
 </body>
 </html>
