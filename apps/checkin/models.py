@@ -11,31 +11,52 @@ class Computer(models.Model):
         return self.name
 
 
-class CheckInSetting(models.Model):
-    TYPE_CHOICES = (
-        (1, 'Daily Check In'),
-        (2, 'Meeting Check In'),
-    )
+class TempCheckInSetting(models.Model):
     teacher = models.ForeignKey(Teacher)
-    c_type = models.IntegerField(choices=TYPE_CHOICES)
-    enable = models.BooleanField(default=False)
+    name = models.CharField(max_length=30)
+    date = models.DateField()
+    time = models.TimeField()
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+    computer = models.ForeignKey(Computer, blank=True, null=True)
+
+
+class TempCheckIn(models.Model):
+    target = models.ForeignKey(TempCheckInSetting)
+    postgraduate = models.ForeignKey(Postgraduate)
     date_time = models.DateTimeField()
+
+
+class DailyCheckInSetting(models.Model):
+    TIMES_CHOICES = (
+        (1, '1'),
+        (2, '2'),
+        (3, '3'),
+        (4, '4')
+    )
+    teacher = models.ForeignKey(Teacher, unique=True)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    week_option = models.CharField(max_length=7)
+    times = models.IntegerField(default=1, choices=TIMES_CHOICES)
+    time1_start = models.TimeField()
+    time1_end = models.TimeField()
+    time2_start = models.TimeField(blank=True, null=True)
+    time2_end = models.TimeField(blank=True, null=True)
+    time3_start = models.TimeField(blank=True, null=True)
+    time3_end = models.TimeField(blank=True, null=True)
+    time4_start = models.TimeField(blank=True, null=True)
+    time4_end = models.TimeField(blank=True, null=True)
     computer = models.ForeignKey(Computer, blank=True, null=True)
 
 
 class DailyCheckIn(models.Model):
     postgraduate = models.ForeignKey(Postgraduate)
     date = models.DateField()
-    forenoon_in = models.TimeField(blank=True, null=True)
-    forenoon_out = models.TimeField(blank=True, null=True)
-    afternoon_in = models.TimeField(blank=True, null=True)
-    afternoon_out = models.TimeField(blank=True, null=True)
+    check1 = models.TimeField(blank=True, null=True)
+    check2 = models.TimeField(blank=True, null=True)
+    check3 = models.TimeField(blank=True, null=True)
+    check4 = models.TimeField(blank=True, null=True)
 
     def __str__(self):
         return self.postgraduate.name + self.date.strftime(" %Y-%m-%d")
-
-
-class MeetingCheckIn(models.Model):
-    target = models.ForeignKey(CheckInSetting)
-    postgraduate = models.ForeignKey(Postgraduate)
-    date_time = models.DateTimeField()

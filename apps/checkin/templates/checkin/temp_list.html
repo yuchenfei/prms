@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>临时签到列表</h2>
+    {% for item in items %}
+        {{ item.name }}
+        {{ item.date }}
+        {{ item.time }}
+        {{ item.start_time }}
+        {{ item.end_time }}
+        {{ item.computer }}
+        <br>
+    {% endfor %}
+{% endblock %}

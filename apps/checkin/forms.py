@@ -1,6 +1,6 @@
-from django.forms import ModelForm, TextInput, ValidationError, HiddenInput, DateTimeInput
+from django.forms import ModelForm, TextInput, ValidationError, HiddenInput, DateInput
 
-from .models import Computer, CheckInSetting
+from .models import Computer, TempCheckInSetting, DailyCheckInSetting
 
 
 class ComputerForm(ModelForm):
@@ -23,15 +23,32 @@ class ComputerForm(ModelForm):
         return self.cleaned_data
 
 
-class CheckInSettingForm(ModelForm):
+class TempCheckInSettingForm(ModelForm):
     class Meta:
-        model = CheckInSetting
-        fields = ('date_time', 'computer', 'enable')
+        model = TempCheckInSetting
+        exclude = ['teacher']
         labels = {
-            'date_time': '时间',
+            'name': '名称',
+            'date': '日期',
+            'time': '通知时间',
+            'start_time': '签到开始时间',
+            'end_time': '签到截至时间',
             'computer': '指定计算机',
-            'enable': '使能'
         }
         widgets = {
-            'date_time': DateTimeInput(format='%Y-%m-%d %H:%M')
+            'date': DateInput(format='%Y-%m-%d')
+        }
+
+
+class DailyCheckInSettingForm(ModelForm):
+    class Meta:
+        model = DailyCheckInSetting
+        exclude = ['teacher']
+        labels = {
+            'start_date': '开始日期',
+            'end_date': '结束日期',
+            'times': '每日签到次数',
+            'time1_start': '开始时间',
+            'time1_end': '结束时间',
+            'computer': '指定计算机'
         }

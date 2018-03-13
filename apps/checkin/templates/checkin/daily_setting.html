@@ -1,0 +1,232 @@
+{% extends 'base.html' %}
+
+{% block extrahead %}
+    {% load static %}
+    <!-- DatetimePicker stylesheet -->
+    <link rel="stylesheet" href="{% static 'bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css' %}">
+    <!-- ClockPicker stylesheet -->
+    <link rel="stylesheet" href="{% static 'bootstrap-clockpicker/css/bootstrap-clockpicker.min.css' %}">
+    <!-- jquery-pretty-radio-checkbox stylesheet -->
+    <link rel="stylesheet" href="{% static 'jquery-pretty-radio-checkbox/css/jquery-labelauty.css' %}">
+    <!-- this page specific stylesheet -->
+    <link rel="stylesheet" href="{% static 'css/daily_setting.css' %}">
+{% endblock %}
+
+{% block content %}
+    {% load widget_tweaks %}
+    <h2>日常签到设置</h2>
+    <form method="post">
+        {% csrf_token %}i
+        <h3>日期范围</h3>
+        <div class="row">
+            <div class="col-xs-6">
+                <div class="form-group">
+                    {{ form.start_date.label_tag }}
+                    <div class="input-group date form_date" data-date="">
+                        {{ form.start_date|add_class:"form-control" }}
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-6">
+                <div class="form-group">
+                    {{ form.end_date.label_tag }}
+                    <div class="input-group date form_date" data-date="">
+                        {{ form.end_date|add_class:"form-control" }}
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <h3>星期选择</h3>
+        <ul class="dowebok">
+            <li><input id="xq1" name="checkbox" data-labelauty="星期一" type="checkbox"></li>
+            <li><input id="xq2" name="checkbox" data-labelauty="星期二" type="checkbox"></li>
+            <li><input id="xq3" name="checkbox" data-labelauty="星期三" type="checkbox"></li>
+            <li><input id="xq4" name="checkbox" data-labelauty="星期四" type="checkbox"></li>
+            <li><input id="xq5" name="checkbox" data-labelauty="星期五" type="checkbox"></li>
+            <li><input id="xq6" name="checkbox" data-labelauty="星期六" type="checkbox"></li>
+            <li><input id="xq7" name="checkbox" data-labelauty="星期日" type="checkbox"></li>
+        </ul>
+        {{ form.week_option|attr:"hidden" }}
+        <h3>签到时间区间</h3>
+        <div class="form-group">
+            {{ form.times.label_tag }}
+            {{ form.times|add_class:"form-control" }}
+        </div>
+        <div class="row">
+            <div class="col-xs-6">
+                <div class="form-group">
+                    {{ form.time1_start.label_tag }}
+                    <div class="input-group clockpicker">
+                        {{ form.time1_start|add_class:"form-control" }}
+                        <span class="input-group-addon">
+                            <span class="glyphicon glyphicon-time"></span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-6">
+                <div class="form-group">
+                    {{ form.time1_end.label_tag }}
+                    <div class="input-group clockpicker">
+                        {{ form.time1_end|add_class:"form-control" }}
+                        <span class="input-group-addon">
+                            <span class="glyphicon glyphicon-time"></span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row t2">
+            <div class="col-xs-6">
+                <div class="form-group">
+                    <div class="input-group clockpicker">
+                        {{ form.time2_start|add_class:"form-control" }}
+                        <span class="input-group-addon">
+                            <span class="glyphicon glyphicon-time"></span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-6">
+                <div class="form-group">
+                    <div class="input-group clockpicker">
+                        {{ form.time2_end|add_class:"form-control" }}
+                        <span class="input-group-addon">
+                            <span class="glyphicon glyphicon-time"></span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row t3">
+            <div class="col-xs-6">
+                <div class="form-group">
+                    <div class="input-group clockpicker">
+                        {{ form.time3_start|add_class:"form-control" }}
+                        <span class="input-group-addon">
+                            <span class="glyphicon glyphicon-time"></span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-6">
+                <div class="form-group">
+                    <div class="input-group clockpicker">
+                        {{ form.time3_end|add_class:"form-control" }}
+                        <span class="input-group-addon">
+                            <span class="glyphicon glyphicon-time"></span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row t4">
+            <div class="col-xs-6">
+                <div class="form-group">
+                    <div class="input-group clockpicker">
+                        {{ form.time4_start|add_class:"form-control" }}
+                        <span class="input-group-addon">
+                            <span class="glyphicon glyphicon-time"></span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-6">
+                <div class="form-group">
+                    <div class="input-group clockpicker">
+                        {{ form.time4_end|add_class:"form-control" }}
+                        <span class="input-group-addon">
+                            <span class="glyphicon glyphicon-time"></span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <h3>签到条件</h3>
+        <div class="form-group">
+            {{ form.computer.label_tag }}
+            {{ form.computer|add_class:"form-control" }}
+        </div>
+        <div class="pull-right">
+            <input class="btn btn-primary" type="submit" value="保存">
+            <input class="btn btn-danger" type="button" value="取消">
+        </div>
+    </form>
+{% endblock %}
+
+
+
+{% block extrascript %}
+    <!-- DatetimePicker script -->
+    <script type="text/javascript"
+            src="{% static 'bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js' %}"></script>
+    <script type="text/javascript"
+            src="{% static 'bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.zh-CN.js' %}"></script>
+    <!-- ClockPicker script -->
+    <script type="text/javascript" src="{% static 'bootstrap-clockpicker/js/bootstrap-clockpicker.min.js' %}"></script>
+    <!-- jquery-pretty-radio-checkbox script -->
+    <script type="text/javascript" src="{% static 'jquery-pretty-radio-checkbox/js/jquery-labelauty.js' %}"></script>
+    <!-- this page specific script -->
+    <script>
+        $('.form_date').datetimepicker({
+            language: 'zh-CN',
+            format: "yyyy-mm-dd",
+            weekStart: 1,
+            autoclose: true,
+            todayBtn: true,
+            todayHighlight: true,
+            startView: 4,
+            minView: 2
+        });
+        $('.clockpicker').clockpicker({
+            autoclose: true
+        });
+        $(':input').labelauty();
+        // 初始化星期选择
+        var week_option = $('#{{ form.week_option.id_for_label }}');
+        if (!week_option.val()) {
+            week_option.val("1111100");
+        }
+        var options = week_option.val().split('');
+        for (var i = 0; i < 7; i++) {
+            if (options[i] === '1') {
+                $('#xq' + (i + 1)).attr('checked', 'true');
+            } else {
+                $('#xq' + (i + 1)).removeAttr('checked');
+            }
+        }
+        $('input.labelauty').change(function () {
+            var index = this.id.slice(2, 3) * 1 - 1;
+            if (options[index] === '1') {
+                options[index] = '0';
+            } else {
+                options[index] = '1';
+            }
+            week_option.val(options.join(''));
+            {#console.log(week_option.val());#}
+        });
+        // 初始化时间区间
+        var times = $('#id_times');
+
+        function times_change() {
+            var value = times.val() * 1;
+            console.log(value);
+            for (i = 2; i <= 4; i++) {
+                if (i > value) {
+                    $('.t' + i).hide();
+                } else {
+                    $('.t' + i).show();
+                }
+            }
+        }
+
+        times_change();
+        times.change(function () {
+            times_change();
+        })
+    </script>
+{% endblock %}

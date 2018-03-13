@@ -6,15 +6,13 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>研究生科研管理系统</title>
-
-    <!-- bootstrap -->
     {% load staticfiles %}
+    <!-- bootstrap stylesheet -->
     <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
-
-    <!-- global styles -->
+    <!-- global stylesheet -->
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-
+    <!-- extra stylesheet -->
     {% block extrahead %}{% endblock %}
 </head>
 <body class="bg">
@@ -67,13 +65,15 @@
     </div>
 {% endblock %}
 
-<!-- scripts -->
+<!-- jQuery and Bootstrap scripts -->
 <script src="http://code.jquery.com/jquery.min.js"></script>
 <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+
 {#<script src="{% static 'js/add_active_navigation_class.js' %}"></script>#}
 <script src="{% static 'js/index.js' %}"></script>
+<!-- extra scripts -->
 {% block extrascript %}{% endblock %}
-
+<!-- temp scripts -->
 <script>
     // 暂时使用JS实现，内容较长时可能有bug
     window.onload = function () {

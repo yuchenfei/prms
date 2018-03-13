@@ -8,8 +8,8 @@ from io import BytesIO
 
 from account.views import get_login_user
 from .check_in_code import CheckInCode
-from .models import DailyCheckIn, Computer, CheckInSetting
-from .forms import ComputerForm, CheckInSettingForm
+from .models import DailyCheckIn, Computer, TempCheckInSetting, DailyCheckInSetting
+from .forms import ComputerForm, TempCheckInSettingForm, DailyCheckInSettingForm
 
 
 @csrf_exempt
@@ -26,26 +26,50 @@ def check_in(request):
         return render(request, 'checkin/check_in.html')
 
 
-def setting(request):
+def temp_list(request):
+    response_data = dict()
+    teacher = get_login_user(request)
+    response_data['teacher'] = teacher
+    response_data['items'] = TempCheckInSetting.objects.filter(teacher=teacher).all()
+    return render(request, 'checkin/temp_list.html', response_data)
+
+
+def temp_setting(request):
     response_data = dict()
     teacher = get_login_user(request)
     response_data['teacher'] = teacher
     if request.method == 'POST':
-        form = CheckInSettingForm(request.POST)
+        form = TempCheckInSettingForm(request.POST)
         if form.is_valid():
-            check_in_setting = form.save(commit=False)
-            check_in_setting.teacher = teacher
-            check_in_setting.c_type = 2
-            check_in_setting.save()
-            redirect('check_in_setting')
+            setting = form.save(commit=False)
+            setting.teacher = teacher
+            setting.save()
+            return redirect('check_in_temp_list')
         else:
             print(form.errors)
     else:
-        form = CheckInSettingForm()
+        form = TempCheckInSettingForm()
     response_data['form'] = form
-    response_data['items'] = CheckInSetting.objects.filter(teacher=teacher,
-                                                           c_type=CheckInSetting.TYPE_CHOICES[1][0]).all()
-    return render(request, 'checkin/check_in_setting.html', response_data)
+    return render(request, 'checkin/temp_setting.html', response_data)
+
+
+def daily_setting(request):
+    response_data = dict()
+    teacher = get_login_user(request)
+    response_data['teacher'] = teacher
+    instance = None
+    if DailyCheckInSetting.objects.filter(teacher=teacher).exists():
+        instance = DailyCheckInSetting.objects.filter(teacher=teacher).first()
+    if request.method == 'POST':
+        form = DailyCheckInSettingForm(request.POST, instance=instance)
+        if form.is_valid():
+            setting = form.save(commit=False)
+            setting.teacher = teacher
+            setting.save()
+    else:
+        form = DailyCheckInSettingForm(instance=instance)
+    response_data['form'] = form
+    return render(request, 'checkin/daily_setting.html', response_data)
 
 
 def computer_list(request):

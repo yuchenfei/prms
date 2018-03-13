@@ -11,7 +11,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from account.verification import verify_postgraduate_by_password, verify_postgraduate_by_jwt
-from checkin.models import Computer, DailyCheckIn, CheckInSetting, MeetingCheckIn
+from checkin.models import Computer, DailyCheckIn, TempCheckInSetting, TempCheckIn
 from checkin.check_in_code import CheckInCode
 from .models import Device
 
@@ -80,13 +80,13 @@ def items(request):
                 if daily_check_in[0].afternoon_out:
                     json['index'] = 4
             today = datetime.today()
-            records = CheckInSetting.objects.filter(teacher=postgraduate.teacher, date_time__date=today, c_type=2,
-                                                    enable=True).all()
+            records = TempCheckInSetting.objects.filter(teacher=postgraduate.teacher, date_time__date=today, c_type=2,
+                                                        enable=True).all()
             for record in records:
                 json['meeting_index'].append(record.id)
                 json['meeting_time'].append(record.date_time.time().strftime('%H:%M'))
 
-            records_ok = MeetingCheckIn.objects.filter(target__in=records, postgraduate=postgraduate).all()
+            records_ok = TempCheckIn.objects.filter(target__in=records, postgraduate=postgraduate).all()
             for record in records_ok:
                 json['meeting_ok'].append(record.target.id)
             print(json)
@@ -139,13 +139,13 @@ def check_in(request):
                         record.save()
                         json['status_code'] = 1
                     if type_ == 2:
-                        setting = CheckInSetting.objects.get(id=index)
+                        setting = TempCheckInSetting.objects.get(id=index)
                         if setting.computer:
                             if not setting.computer == check_in_code.get_computer():
                                 # 签到设置中限定计算机，且计算机不符
                                 return JsonResponse(json)
-                        MeetingCheckIn.objects.create(target=setting, postgraduate=postgraduate,
-                                                      date_time=datetime.now())
+                        TempCheckIn.objects.create(target=setting, postgraduate=postgraduate,
+                                                   date_time=datetime.now())
                         json['status_code'] = 1
                 else:
                     # 扫描的是长期二维码，创建短期二维码
