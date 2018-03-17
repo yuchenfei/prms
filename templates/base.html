@@ -73,18 +73,6 @@
 <script src="{% static 'js/index.js' %}"></script>
 <!-- extra scripts -->
 {% block extrascript %}{% endblock %}
-<!-- temp scripts -->
-<script>
-    // 暂时使用JS实现，内容较长时可能有bug
-    window.onload = function () {
-        function auto_height() {
-            document.getElementById("box").style.height = document.documentElement.clientHeight - 100 + "px";
-        }
-
-        auto_height();
-        onresize = auto_height;
-    }
-</script>
 
 </body>
 </html>
