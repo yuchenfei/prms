@@ -11,13 +11,14 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from account.verification import verify_postgraduate_by_password, verify_postgraduate_by_jwt
-from checkin.models import Computer, DailyCheckIn, TempCheckInSetting, TempCheckIn
+from checkin.models import DailyCheckInSetting, DailyCheckIn, TempCheckInSetting, TempCheckIn, Computer
 from checkin.check_in_code import CheckInCode
 from .models import Device
 
 
 @csrf_exempt
 def auth(request):
+    """认证用户身份"""
     if request.method == 'POST':
         json = {'result': False,
                 'token': '',
@@ -57,55 +58,63 @@ def auth(request):
 
 @csrf_exempt
 def items(request):
+    """获取签到项目及其状态"""
     json = {
         'auth_result': False,
-        'index': 0,
-        'meeting_index': [],
-        'meeting_time': [],
-        'meeting_ok': []
+        'daily_times': 1,
+        'daily_time_interval': '',
+        'daily_status': 0,
+        'temp_id': [],
+        'temp_time': [],
+        'temp_ok': []
     }
     if request.method == 'POST':
         token = request.POST.get('token')
         postgraduate = verify_postgraduate_by_jwt(token)
         if postgraduate:
             json['auth_result'] = True
-            daily_check_in = DailyCheckIn.objects.filter(date=datetime.now().date(), postgraduate=postgraduate)
-            if daily_check_in.exists():
-                if daily_check_in[0].forenoon_in:
-                    json['index'] = 1
-                if daily_check_in[0].forenoon_out:
-                    json['index'] = 2
-                if daily_check_in[0].afternoon_in:
-                    json['index'] = 3
-                if daily_check_in[0].afternoon_out:
-                    json['index'] = 4
-            today = datetime.today()
-            records = TempCheckInSetting.objects.filter(teacher=postgraduate.teacher, date_time__date=today, c_type=2,
-                                                        enable=True).all()
-            for record in records:
-                json['meeting_index'].append(record.id)
-                json['meeting_time'].append(record.date_time.time().strftime('%H:%M'))
-
-            records_ok = TempCheckIn.objects.filter(target__in=records, postgraduate=postgraduate).all()
+            # 日常签到相关
+            daily_setting = DailyCheckInSetting.objects.get(teacher=postgraduate.teacher)
+            times = daily_setting.times
+            json['daily_times'] = times
+            for i in range(times):
+                index = i + 1
+                start = 'time{}_start'.format(index)
+                end = 'time{}_end'.format(index)
+                json['daily_time_interval'] += getattr(daily_setting, start).strftime('%H:%M')
+                json['daily_time_interval'] += '-'
+                json['daily_time_interval'] += getattr(daily_setting, end).strftime('%H:%M')
+                json['daily_time_interval'] += ';'
+            today_check_in = DailyCheckIn.objects.filter(date=datetime.today(), postgraduate=postgraduate)
+            if today_check_in.exists():
+                for i in range(times):
+                    index = i + 1
+                    if getattr(today_check_in[0], 'check{}'.format(index)):
+                        json['daily_status'] = index
+            # 临时签到相关
+            temp_setting = TempCheckInSetting.objects.filter(teacher=postgraduate.teacher, date=datetime.today()).all()
+            for setting in temp_setting:
+                json['temp_id'].append(setting.id)
+                json['temp_time'].append(setting.time.strftime('%H:%M'))
+            records_ok = TempCheckIn.objects.filter(target__in=temp_setting, postgraduate=postgraduate).all()
             for record in records_ok:
-                json['meeting_ok'].append(record.target.id)
+                json['temp_ok'].append(record.target.id)
             print(json)
-
     return JsonResponse(json)
 
 
 @csrf_exempt
 def check_in(request):
+    """签到逻辑"""
     json = {
         'auth_result': False,
-        'status_code': -1
+        'status_code': -1  # -1:条件不符合；0：长周期二维码（继续扫描）；1：签到成功；-2：时间不符合
     }
     if request.method == 'POST':
         token = request.POST.get('token')
         code = request.POST.get('code')
         type_ = int(request.POST.get('type'))
         index = int(request.POST.get('index'))
-
         postgraduate = verify_postgraduate_by_jwt(token)
         if postgraduate:
             json['auth_result'] = True
@@ -120,32 +129,46 @@ def check_in(request):
                 if is_valid:
                     # 扫描的是短期二维码，进行签到
                     if type_ == 1:
-                        today = datetime.now().date()
-                        current_time = datetime.now().time()
-                        record = DailyCheckIn.objects.filter(date=today, postgraduate=postgraduate)
+                        # 日常签到
+                        setting = DailyCheckInSetting.objects.get(teacher=postgraduate.teacher)
+                        # 检查设置的条件是否满足
+                        if setting.computer:
+                            if setting.computer != check_in_code.get_computer():
+                                # 签到设置中限定计算机，且计算机不符
+                                return JsonResponse(json)
+                        # 检查时间是否符合设置区间
+                        start = 'time{}_start'.format(index)
+                        end = 'time{}_end'.format(index)
+                        if not getattr(setting, start) < datetime.now().time() < getattr(setting, end):
+                            json['status_code'] = -2
+                            return JsonResponse(json)
+                        # 条件均符合，执行签到
+                        record = DailyCheckIn.objects.filter(date=datetime.today(), postgraduate=postgraduate)
                         if record.exists():
                             record = record[0]
                         else:
-                            record = DailyCheckIn.objects.create(date=today, postgraduate=postgraduate)
-                        if index == 1:
-                            print('1 ok')
-                            record.forenoon_in = current_time
-                        elif index == 2:
-                            record.forenoon_out = current_time
-                        elif index == 3:
-                            record.afternoon_in = current_time
-                        elif index == 4:
-                            record.afternoon_out = current_time
+                            record = DailyCheckIn.objects.create(date=datetime.today(), postgraduate=postgraduate)
+                        setattr(record, 'check{}'.format(index), datetime.now().time())  # 将当前时间写入对应的属性
                         record.save()
                         json['status_code'] = 1
+                    # 临时签到
                     if type_ == 2:
                         setting = TempCheckInSetting.objects.get(id=index)
+                        # 检查设置的条件是否满足
                         if setting.computer:
-                            if not setting.computer == check_in_code.get_computer():
+                            if setting.computer != check_in_code.get_computer():
                                 # 签到设置中限定计算机，且计算机不符
                                 return JsonResponse(json)
-                        TempCheckIn.objects.create(target=setting, postgraduate=postgraduate,
-                                                   date_time=datetime.now())
+                        # 检查日期
+                        if setting.date != datetime.today():
+                            json['status_code'] = -2
+                            return JsonResponse(json)
+                        # 检查时间是否符合设置区间
+                        if not setting.start_time < datetime.now().time() < setting.end_time:
+                            json['status_code'] = -2
+                            return JsonResponse(json)
+                        # 条件均符合，执行签到
+                        TempCheckIn.objects.create(target=setting, postgraduate=postgraduate, date_time=datetime.now())
                         json['status_code'] = 1
                 else:
                     # 扫描的是长期二维码，创建短期二维码

@@ -35,6 +35,7 @@ class DailyCheckInSetting(models.Model):
         (4, '4')
     )
     teacher = models.ForeignKey(Teacher, unique=True)
+    # teacher = models.OneToOneField(Teacher)
     start_date = models.DateField()
     end_date = models.DateField()
     week_option = models.CharField(max_length=7)

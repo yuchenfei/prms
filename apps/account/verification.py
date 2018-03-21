@@ -29,6 +29,9 @@ def verify_postgraduate_by_jwt(token):
         # token有效，检索用户信息
         user = Postgraduate.objects.get(pid=decoded['sub'])
         return user
+    except jwt.DecodeError:
+        # token无法解析
+        return None
     except jwt.ExpiredSignatureError:
         # token无效会捕获此异常
         return None
