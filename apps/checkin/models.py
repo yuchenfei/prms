@@ -29,10 +29,9 @@ class TempCheckIn(models.Model):
 
 class DailyCheckInSetting(models.Model):
     TIMES_CHOICES = (
-        (1, '1'),
-        (2, '2'),
-        (3, '3'),
-        (4, '4')
+        (1, '单次签到'),
+        (2, '一个时间段'),
+        (4, '两个时间段')
     )
     teacher = models.ForeignKey(Teacher, unique=True)
     # teacher = models.OneToOneField(Teacher)

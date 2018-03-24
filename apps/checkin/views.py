@@ -1,3 +1,4 @@
+import time
 from datetime import datetime
 
 import qrcode
@@ -95,32 +96,42 @@ def computer_add(request):
 
 
 def show_check_in(request):
+    response_data = dict()
     teacher = get_login_user(request)
-    response_data = {'teacher': teacher}
+    response_data['teacher'] = teacher
     if request.method == 'GET':
         date = request.GET.get('date')
         if date is not None:
+            # 处理图表显示数据
             json_data = {}
             if date == 'today':
-                date = datetime.now().date()
-                json_data['startDate'] = date.strftime("%Y-%m-%d")
-            check_in_set = DailyCheckIn.objects.filter(date=date).filter(postgraduate__teacher=teacher).all()
+                date = datetime.today()
+            json_data['startDate'] = date.strftime("%Y-%m-%d")
+            check_in_set = DailyCheckIn.objects.filter(date=date, postgraduate__teacher=teacher).all()
+            setting = DailyCheckInSetting.objects.get(teacher=teacher)  # 读取日常签到设置
+            json_data['times'] = setting.times
+            for i in range(setting.times):
+                index = i + 1
+                start = 'time{}_start'.format(index)
+                end = 'time{}_end'.format(index)
+                json_data[start] = to_js_date(date, getattr(setting, start))
+                json_data[end] = to_js_date(date, getattr(setting, end))
             json_data['data'] = []
             for record in check_in_set:
-                json_data['data'].append(
-                    {
-                        'name': record.postgraduate.name,
-                        'forenoon_in': to_js_date(record.date, record.forenoon_in),
-                        'forenoon_out': to_js_date(record.date, record.forenoon_out),
-                        'afternoon_in': to_js_date(record.date, record.afternoon_in),
-                        'afternoon_out': to_js_date(record.date, record.afternoon_out)
-                    }
-                )
+                json_data['data'].append({
+                    'name': record.postgraduate.name,
+                    'check1': to_js_date(record.date, record.check1),
+                    'check2': to_js_date(record.date, record.check2),
+                    'check3': to_js_date(record.date, record.check3),
+                    'check4': to_js_date(record.date, record.check4)
+                })
             return JsonResponse(json_data)
         else:
             return render(request, 'checkin/show_check_in.html', response_data)
 
 
 def to_js_date(d, t):
+    if not t:
+        return None
     dt = datetime.combine(d, t)
-    return int(datetime.time.mktime(dt.timetuple())) * 1000
+    return int(time.mktime(dt.timetuple())) * 1000
