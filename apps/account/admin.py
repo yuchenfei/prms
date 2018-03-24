@@ -22,7 +22,7 @@ class TeacherAdmin(admin.ModelAdmin):
 
 
 class PostgraduateAdmin(admin.ModelAdmin):
-    fields = ('pid', 'name', 'password', 'teacher')
+    fields = ('phone', 'name', 'password', 'teacher')
 
     def save_model(self, request, obj, form, change):
         create_password(obj)

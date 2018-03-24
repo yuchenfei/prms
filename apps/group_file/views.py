@@ -1,6 +1,7 @@
 from datetime import datetime
 from django.shortcuts import render, redirect
 
+from account.models import Teacher
 from account.views import get_login_user, login_required
 from .forms import GroupFileForm
 from .models import GroupFile
@@ -8,9 +9,16 @@ from .models import GroupFile
 
 @login_required
 def group_file_list(request):
+    # todo:完善不同用户的显示逻辑
     response_data = dict()
-    response_data['teacher'] = teacher = get_login_user(request)
-    response_data['file_list'] = GroupFile.objects.filter(group=teacher.group).all()
+    user = get_login_user(request)
+    if isinstance(user, Teacher):
+        response_data['teacher'] = user
+        group = user.group
+    else:
+        response_data['postgraduate'] = user
+        group = user.teacher.group
+    response_data['file_list'] = GroupFile.objects.filter(group=group).all()
     return render(request, 'group_file/group_file_list.html', response_data)
 
 

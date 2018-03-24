@@ -53,10 +53,10 @@ def login(request):
         if request.method == 'POST':
             form = PostgraduateLoginForm(request.POST)
             if form.is_valid():
-                postgraduate = verify_postgraduate_by_password(form.cleaned_data["pid"], form.cleaned_data['password'])
+                postgraduate = verify_postgraduate_by_password(form.cleaned_data["phone"], form.cleaned_data['password'])
                 if postgraduate:
                     request.session['type'] = 'postgraduate'
-                    request.session['user'] = postgraduate.pid
+                    request.session['user'] = postgraduate.phone
                     return redirect('postgraduate_home')
                 else:
                     form.add_error(None, '密码错误')
@@ -83,8 +83,8 @@ def get_login_user(request):
         username = request.session.get('user')
         return Teacher.objects.get(username=username)
     if user_type == 'postgraduate':
-        pid = request.session.get('user')
-        return Postgraduate.objects.get(pid=pid)
+        phone = request.session.get('user')
+        return Postgraduate.objects.get(phone=phone)
 
 
 def home(request):
@@ -138,7 +138,7 @@ def table_postgraduate_list(request):
         order = request.GET.get('order')
         teacher = get_login_user(request)
         if search:
-            postgraduates = teacher.postgraduate_set.filter(Q(id=search) | Q(name=search))  # 或查询需要试用django Q
+            postgraduates = teacher.postgraduate_set.filter(Q(phone=search) | Q(name=search))  # 或查询需要试用django Q
         else:
             postgraduates = teacher.postgraduate_set.all()
 
@@ -152,11 +152,10 @@ def table_postgraduate_list(request):
         response_data = {'total': postgraduates.count(), 'rows': []}
         for postgraduate in postgraduates:
             response_data['rows'].append({
-                "postgraduate_id": postgraduate.pid,
+                "postgraduate_phone": postgraduate.phone,
                 "postgraduate_name": postgraduate.name,
                 "postgraduate_teacher": postgraduate.teacher.username,
             })
-
         if not offset:
             offset = 0
         if not limit:
@@ -172,6 +171,7 @@ def import_postgraduate_list(request):
     if request.method == 'POST' and request.FILES['excel']:
         excel = request.FILES['excel']
         fs = FileSystemStorage()
+        fs.delete(UPLOAD_XLSX_FILE)  # 删除暂存文件
         fs.save(UPLOAD_XLSX_FILE, excel)  # 暂存media文件夹中
         response_data['upload_file'] = True
     elif request.method == 'GET' and request.GET.get('confirm') == 'true':
@@ -183,9 +183,9 @@ def import_postgraduate_list(request):
         postgraduates = []
         for row in rows:
             line = [col.value for col in row]
-            if line[0] == "学号":
-                continue  # 跳过标题（TODO：以是否为数字作为判断）
-            postgraduate = Postgraduate(pid=line[0],
+            if line[0] == "手机号":
+                continue  # 跳过标题
+            postgraduate = Postgraduate(phone=line[0],
                                         password='123456',
                                         name=line[1],
                                         teacher=teacher)
@@ -211,11 +211,11 @@ def table_uploaded_postgraduate_list(request):
         response_data = {'total': 0, 'rows': []}
         for row in rows:
             line = [col.value for col in row]
-            if line[0] == "学号":
+            if line[0] == "手机号":
                 continue
             # noinspection PyTypeChecker
             response_data['rows'].append({
-                "postgraduate_id": line[0],
+                "postgraduate_phone": line[0],
                 "postgraduate_name": line[1],
             })
 
@@ -248,7 +248,7 @@ def import_teacher(request):
         for row in rows:
             line = [col.value for col in row]
             if line[0] == "用户名":
-                continue  # 跳过标题（TODO：以是否为数字作为判断）
+                continue  # 跳过标题
             t = Teacher(username=line[0], password='123456', group=group)
             create_password(t)
             teachers.append(t)

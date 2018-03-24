@@ -20,18 +20,20 @@ class Teacher(models.Model):
 
 
 class Postgraduate(models.Model):
-    pid = models.CharField(max_length=30, unique=True, verbose_name='学号')
+    phone = models.CharField(max_length=11, unique=True, verbose_name='手机号')
     password = models.CharField(max_length=64, verbose_name='密码')  # 密码摘要
     salt = models.CharField(max_length=64)  # 盐
     name = models.CharField(max_length=50, verbose_name='姓名')
     teacher = models.ForeignKey('Teacher', verbose_name='导师')
+    school = models.CharField(max_length=30, blank=True, null=True, verbose_name='学校')
+    classes = models.CharField(max_length=30, blank=True, null=True, verbose_name='班级')
 
     class Meta:
         verbose_name = '研究生'
         verbose_name_plural = '研究生'
 
     def __str__(self):
-        return '(' + self.pid + ')' + self.name
+        return '(' + self.phone + ')' + self.name
 
 
 class Group(models.Model):

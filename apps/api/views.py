@@ -23,16 +23,16 @@ def auth(request):
         json = {'result': False,
                 'token': '',
                 'reason': 0}
-        pid = request.POST.get('pid')
+        phone = request.POST.get('phone')
         password = request.POST.get('password')
         imei = request.POST.get('imei')
 
         # 解密数据
-        pid = decrypt_data(pid)
+        phone = decrypt_data(phone)
         password = decrypt_data(password)
         imei = decrypt_data(imei)
 
-        postgraduate = verify_postgraduate_by_password(pid, password)
+        postgraduate = verify_postgraduate_by_password(phone, password)
         if postgraduate:
             if not Device.objects.filter(postgraduate=postgraduate).exists():
                 Device.objects.create(postgraduate=postgraduate, imei=imei)
@@ -45,7 +45,7 @@ def auth(request):
             payload = {
                 'iat': int(time.time()),  # 签发时间
                 'exp': int(time.time()) + 86400 * 7,  # 过期时间
-                'sub': str(postgraduate.pid),
+                'sub': str(postgraduate.phone),
                 'name': str(postgraduate.name)
             }
             token = jwt.encode(payload, 'secret', algorithm='HS256')

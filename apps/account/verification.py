@@ -14,8 +14,8 @@ def verify_teacher_by_password(username, password):
         return None
 
 
-def verify_postgraduate_by_password(pid, password):
-    postgraduate = Postgraduate.objects.get(pid=pid)
+def verify_postgraduate_by_password(phone, password):
+    postgraduate = Postgraduate.objects.get(phone=phone)
     password = hashlib.pbkdf2_hmac('sha256', str.encode(password), str.encode(postgraduate.salt), 100000).hex()
     if password == postgraduate.password:
         return postgraduate
@@ -27,7 +27,7 @@ def verify_postgraduate_by_jwt(token):
     try:
         decoded = jwt.decode(token, 'secret', algorithm='HS256')
         # token有效，检索用户信息
-        user = Postgraduate.objects.get(pid=decoded['sub'])
+        user = Postgraduate.objects.get(phone=decoded['sub'])
         return user
     except jwt.DecodeError:
         # token无法解析
