@@ -31,6 +31,9 @@
             </div>
         </div>
     {% endfor %}
+    {% if not leave_list %}
+        <p>目前无未处理的请假</p>
+    {% endif %}
     <form name="show_all" method="get">
         <input type="text" name="show_all" value="true" hidden>
     </form>

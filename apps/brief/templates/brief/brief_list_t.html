@@ -25,4 +25,7 @@
             </div>
         </div>
     {% endfor %}
+    {% if not brief_list %}
+        <p>目前未提交任何小结</p>
+    {% endif %}
 {% endblock %}
