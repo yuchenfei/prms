@@ -1,8 +1,8 @@
-ul {
+.week_ul {
     margin: 0;
     padding: 0;
 }
 
-li {
+.week_li {
     display: inline-block;
 }
