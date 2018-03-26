@@ -1,7 +1,9 @@
+import uuid
 from django.db import models
 
 
 class Teacher(models.Model):
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     username = models.CharField(max_length=30, unique=True, verbose_name='用户名')
     password = models.CharField(max_length=64, verbose_name='密码')  # 密码摘要
     salt = models.CharField(max_length=64)  # 盐
@@ -20,6 +22,7 @@ class Teacher(models.Model):
 
 
 class Postgraduate(models.Model):
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     phone = models.CharField(max_length=11, unique=True, verbose_name='手机号')
     password = models.CharField(max_length=64, verbose_name='密码')  # 密码摘要
     salt = models.CharField(max_length=64)  # 盐
@@ -39,8 +42,6 @@ class Postgraduate(models.Model):
 class Group(models.Model):
     name = models.CharField(max_length=100, unique=True, verbose_name='组名')
     leader = models.OneToOneField('Teacher', related_name='lead_group', verbose_name='组长')
-
-    # teacher_member = models.ManyToManyField('Teacher', blank=True, verbose_name='教师成员')
 
     class Meta:
         verbose_name = '课题组'

@@ -11,12 +11,26 @@
 {% endblock %}
 
 {% block content %}
+    <h2>导入教师</h2>
     <form action="" method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        <input type="file" name="excel">
-        <input class="btn btn-default" type="submit" value="上传">
+        <label class="btn btn-info" for="file">选择文件</label>
+        <input id="file" name="excel" type="file" style="display: none">
+        <input class="btn btn-primary" type="submit" value="上传">
     </form>
+    <br>
+    <p>导入文件参考模板：<a href="{% static 'file/导入教师模板.xlsx' %}">导入教师模板</a></p>
+    {% if messages %}
+        {% for message in messages %}
+            {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+                <div class="alert alert-danger" role="alert">{{ message }}</div>
+            {% else %}
+                <div class="alert alert-warning" role="alert">{{ message }}</div>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
     {% if upload_file %}
+        <h3>导入信息预览</h3>
         <table data-toggle="table"
                data-url="{% url 'table_uploaded_teacher_list' %}?upload_file={{ upload_file }}"
                data-pagination="true"
@@ -36,7 +50,7 @@
             {% csrf_token %}
             <input type="hidden" name="confirm" value="true">
             <input type="hidden" name="upload_file" value="{{ upload_file }}">
-            <input type="submit" value="确认">
+            <input class="btn btn-primary" type="submit" value="确认">
         </form>
     {% endif %}
 {% endblock %}

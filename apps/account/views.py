@@ -1,10 +1,12 @@
 import functools
 
+from django.contrib import messages
 from django.core.files.storage import FileSystemStorage
 from django.db.models import Q
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
+from django.utils.datastructures import MultiValueDictKeyError
 from openpyxl import load_workbook
 
 from .admin import create_password
@@ -53,7 +55,8 @@ def login(request):
         if request.method == 'POST':
             form = PostgraduateLoginForm(request.POST)
             if form.is_valid():
-                postgraduate = verify_postgraduate_by_password(form.cleaned_data["phone"], form.cleaned_data['password'])
+                postgraduate = verify_postgraduate_by_password(form.cleaned_data["phone"],
+                                                               form.cleaned_data['password'])
                 if postgraduate:
                     request.session['type'] = 'postgraduate'
                     request.session['user'] = postgraduate.phone
@@ -155,6 +158,8 @@ def table_postgraduate_list(request):
                 "postgraduate_phone": postgraduate.phone,
                 "postgraduate_name": postgraduate.name,
                 "postgraduate_teacher": postgraduate.teacher.username,
+                "postgraduate_school": postgraduate.school,
+                "postgraduate_classes": postgraduate.classes
             })
         if not offset:
             offset = 0
@@ -168,13 +173,30 @@ def table_postgraduate_list(request):
 def import_postgraduate_list(request):
     teacher = get_login_user(request)
     response_data = {'teacher': teacher}
-    if request.method == 'POST' and request.FILES['excel']:
-        excel = request.FILES['excel']
-        fs = FileSystemStorage()
-        fs.delete(UPLOAD_XLSX_FILE)  # 删除暂存文件
-        fs.save(UPLOAD_XLSX_FILE, excel)  # 暂存media文件夹中
-        response_data['upload_file'] = True
-    elif request.method == 'GET' and request.GET.get('confirm') == 'true':
+    try:
+        if request.method == 'POST' and request.FILES['excel']:
+            excel = request.FILES['excel']
+            fs = FileSystemStorage()
+            fs.delete(UPLOAD_XLSX_FILE)  # 删除暂存文件
+            fs.save(UPLOAD_XLSX_FILE, excel)  # 暂存media文件夹中
+            response_data['upload_file'] = True
+            # 检查文件
+            workbook = load_workbook(fs.path(UPLOAD_XLSX_FILE))
+            sheet_names = workbook.get_sheet_names()
+            worksheet = workbook.get_sheet_by_name(sheet_names[0])
+            rows = worksheet.rows
+            for row in rows:
+                line = [col.value for col in row]
+                if len(line) != 4:
+                    response_data['upload_file'] = False
+                    messages.add_message(request, messages.ERROR, '导入文件格式错误，请参照模板')
+                    break
+                if Postgraduate.objects.filter(phone=line[0]).exists():
+                    messages.add_message(request, messages.WARNING, str(line[0]) + '已在数据库中，将不会导入')
+                    continue
+    except MultiValueDictKeyError:
+        return redirect('import_postgraduate_list')
+    if request.method == 'GET' and request.GET.get('confirm') == 'true':
         fs = FileSystemStorage()
         workbook = load_workbook(fs.path(UPLOAD_XLSX_FILE))
         sheet_names = workbook.get_sheet_names()
@@ -183,17 +205,22 @@ def import_postgraduate_list(request):
         postgraduates = []
         for row in rows:
             line = [col.value for col in row]
-            if line[0] == "手机号":
+            if line[0] == "手机号(必要)":
                 continue  # 跳过标题
+            if Postgraduate.objects.filter(phone=line[0]).exists():
+                # 跳过已存在的数据
+                continue
             postgraduate = Postgraduate(phone=line[0],
                                         password='123456',
                                         name=line[1],
-                                        teacher=teacher)
+                                        teacher=teacher,
+                                        school=line[2],
+                                        classes=line[3])
             create_password(postgraduate)
             postgraduates.append(postgraduate)
         Postgraduate.objects.bulk_create(postgraduates)
         fs.delete(UPLOAD_XLSX_FILE)  # 删除暂存文件
-        return HttpResponse('OK')
+        return redirect('postgraduate_list')
     return render(request, 'account/import_postgraduate_list.html', response_data)
 
 
@@ -202,23 +229,25 @@ def table_uploaded_postgraduate_list(request):
     if request.method == 'GET':
         limit = int(request.GET.get('limit'))
         offset = int(request.GET.get('offset'))
-
         fs = FileSystemStorage()
         workbook = load_workbook(fs.path(UPLOAD_XLSX_FILE))
         sheet_names = workbook.get_sheet_names()
         worksheet = workbook.get_sheet_by_name(sheet_names[0])
         rows = worksheet.rows
-        response_data = {'total': 0, 'rows': []}
+        response_data = dict()
+        response_data['rows'] = []
         for row in rows:
             line = [col.value for col in row]
-            if line[0] == "手机号":
+            if line[0] == "手机号(必要)":
                 continue
-            # noinspection PyTypeChecker
+            if Postgraduate.objects.filter(phone=line[0]).exists():
+                continue
             response_data['rows'].append({
                 "postgraduate_phone": line[0],
                 "postgraduate_name": line[1],
+                "postgraduate_school": line[2],
+                "postgraduate_classes": line[3]
             })
-
         if not offset:
             offset = 0
         if not limit:
@@ -233,12 +262,30 @@ def import_teacher(request):
     response_data = dict()
     response_data['teacher'] = teacher = get_login_user(request)
     group = Group.objects.get(leader=teacher)
-    if request.method == 'POST' and request.FILES['excel']:
-        excel = request.FILES['excel']
-        fs = FileSystemStorage()
-        fs.save(UPLOAD_XLSX_FILE, excel)  # 暂存media文件夹中
-        response_data['upload_file'] = True
-    elif request.method == 'GET' and request.GET.get('confirm') == 'true':
+    try:
+        if request.method == 'POST' and request.FILES['excel']:
+            excel = request.FILES['excel']
+            fs = FileSystemStorage()
+            fs.delete(UPLOAD_XLSX_FILE)  # 删除暂存文件
+            fs.save(UPLOAD_XLSX_FILE, excel)  # 暂存media文件夹中
+            response_data['upload_file'] = True
+            # 检查文件
+            workbook = load_workbook(fs.path(UPLOAD_XLSX_FILE))
+            sheet_names = workbook.get_sheet_names()
+            worksheet = workbook.get_sheet_by_name(sheet_names[0])
+            rows = worksheet.rows
+            for row in rows:
+                line = [col.value for col in row]
+                if len(line) != 1:
+                    response_data['upload_file'] = False
+                    messages.add_message(request, messages.ERROR, '导入文件格式错误，请参照模板')
+                    break
+                if Teacher.objects.filter(username=line[0]).exists():
+                    messages.add_message(request, messages.WARNING, str(line[0]) + '已在数据库中，将不会导入')
+                    continue
+    except MultiValueDictKeyError:
+        return redirect('import_teacher')
+    if request.method == 'GET' and request.GET.get('confirm') == 'true':
         fs = FileSystemStorage()
         workbook = load_workbook(fs.path(UPLOAD_XLSX_FILE))
         sheet_names = workbook.get_sheet_names()
@@ -247,8 +294,10 @@ def import_teacher(request):
         teachers = []
         for row in rows:
             line = [col.value for col in row]
-            if line[0] == "用户名":
+            if line[0] == "用户名(必要)":
                 continue  # 跳过标题
+            if Teacher.objects.filter(username=line[0]).exists():
+                continue
             t = Teacher(username=line[0], password='123456', group=group)
             create_password(t)
             teachers.append(t)
@@ -263,18 +312,19 @@ def table_uploaded_teacher_list(request):
     if request.method == 'GET':
         limit = int(request.GET.get('limit'))
         offset = int(request.GET.get('offset'))
-
         fs = FileSystemStorage()
         workbook = load_workbook(fs.path(UPLOAD_XLSX_FILE))
         sheet_names = workbook.get_sheet_names()
         worksheet = workbook.get_sheet_by_name(sheet_names[0])
         rows = worksheet.rows
-        response_data = {'total': 0, 'rows': []}
+        response_data = dict()
+        response_data['rows'] = []
         for row in rows:
             line = [col.value for col in row]
-            if line[0] == "用户名":
+            if line[0] == "用户名(必要)":
                 continue
-            # noinspection PyTypeChecker
+            if Teacher.objects.filter(username=line[0]).exists():
+                continue
             response_data['rows'].append({
                 "teacher_username": line[0],
             })

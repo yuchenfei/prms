@@ -2,7 +2,7 @@
 
 {% block extrahead %}
     {% load staticfiles %}
-    <link href="{%  static 'bootstrap-table/css/bootstrap-table.min.css' %}" rel="stylesheet">
+    <link href="{% static 'bootstrap-table/css/bootstrap-table.min.css' %}" rel="stylesheet">
 {% endblock %}
 
 {% block extrascript %}
@@ -26,6 +26,8 @@
             <th data-field="postgraduate_phone" data-sortable="true">手机号</th>
             <th data-field="postgraduate_name" data-sortable="true">姓名</th>
             <th data-field="postgraduate_teacher">导师</th>
+            <th data-field="postgraduate_school" data-sortable="true">学校</th>
+            <th data-field="postgraduate_classes" data-sortable="true">班级</th>
         </tr>
         </thead>
     </table>

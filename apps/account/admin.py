@@ -22,7 +22,7 @@ class TeacherAdmin(admin.ModelAdmin):
 
 
 class PostgraduateAdmin(admin.ModelAdmin):
-    fields = ('phone', 'name', 'password', 'teacher')
+    exclude = ('uuid', 'salt')
 
     def save_model(self, request, obj, form, change):
         create_password(obj)
