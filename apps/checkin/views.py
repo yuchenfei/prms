@@ -130,6 +130,21 @@ def show_check_in(request):
             return render(request, 'checkin/show_check_in.html', response_data)
 
 
+def my_items(request):
+    response_data = dict()
+    response_data['postgraduate'] = postgraduate = get_login_user(request)
+    response_data['daily_setting'] = None
+    if DailyCheckInSetting.objects.filter(teacher=postgraduate.teacher).exists():
+        response_data['daily_setting'] = setting = DailyCheckInSetting.objects.get(teacher=postgraduate.teacher)
+        week_str = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日']
+        response_data['week_option'] = []
+        for index, option in enumerate(list(setting.week_option)):
+            if option == '1':
+                response_data['week_option'].append(week_str[index])
+    response_data['temp_setting'] = TempCheckInSetting.objects.filter(teacher=postgraduate.teacher).all()
+    return render(request, 'checkin/my_items.html', response_data)
+
+
 def to_js_date(d, t):
     if not t:
         return None

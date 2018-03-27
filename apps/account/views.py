@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.utils.datastructures import MultiValueDictKeyError
 from openpyxl import load_workbook
 
+from api.models import Device
 from .admin import create_password
 from .forms import TeacherLoginForm, PostgraduateLoginForm, GroupTeacherMemberForm
 from .models import Teacher, Postgraduate, Group
@@ -154,12 +155,17 @@ def table_postgraduate_list(request):
 
         response_data = {'total': postgraduates.count(), 'rows': []}
         for postgraduate in postgraduates:
+            device = '未绑定'
+            if Device.objects.filter(postgraduate=postgraduate).exists():
+                if Device.objects.get(postgraduate=postgraduate).imei:
+                    device = '已绑定'
             response_data['rows'].append({
                 "postgraduate_phone": postgraduate.phone,
                 "postgraduate_name": postgraduate.name,
                 "postgraduate_teacher": postgraduate.teacher.username,
                 "postgraduate_school": postgraduate.school,
-                "postgraduate_classes": postgraduate.classes
+                "postgraduate_classes": postgraduate.classes,
+                "postgraduate_device": device
             })
         if not offset:
             offset = 0
@@ -211,7 +217,7 @@ def import_postgraduate_list(request):
                 # 跳过已存在的数据
                 continue
             postgraduate = Postgraduate(phone=line[0],
-                                        password='123456',
+                                        password=line[0],
                                         name=line[1],
                                         teacher=teacher,
                                         school=line[2],

@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>签到项目</h2>
+    <div class="panel panel-default">
+        <div class="panel-heading"><b>日常签到</b></div>
+        <div class="panel-body">
+            {% if daily_setting %}
+                <h4>日期范围：</h4>
+                <span class="label label-info">{{ daily_setting.start_date }}</span> -
+                <span class="label label-info">{{ daily_setting.end_date }}</span>
+                <h4>星期：</h4>
+                {% for option in week_option %}
+                    <span class="label label-info">{{ option }}</span>
+                {% endfor %}
+                <h4>签到时间区间：</h4>
+                <input type="text" value="{{ daily_setting.times }}" style="display: none">
+                <div class="t1" style="margin-bottom: 5px">
+                    <span class="label label-info">{{ daily_setting.time1_start }}</span> - <span
+                        class="label label-info">{{ daily_setting.time1_end }}</span>
+                </div>
+                <div class="t2" style="margin-bottom: 5px">
+                    <span class="label label-info">{{ daily_setting.time2_start }}</span> - <span
+                        class="label label-info">{{ daily_setting.time2_end }}</span>
+                </div>
+                <div class="t3" style="margin-bottom: 5px">
+                    <span class="label label-info">{{ daily_setting.time3_start }}</span> - <span
+                        class="label label-info">{{ daily_setting.time3_end }}</span>
+                </div>
+                <div class="t4">
+                    <span class="label label-info">{{ daily_setting.time4_start }}</span> - <span
+                        class="label label-info">{{ daily_setting.time4_end }}</span>
+                </div>
+                <h4>签到条件：</h4>
+                {% if daily_setting.computer %}
+                    指定计算机：{{ daily_setting.computer.name }}
+                {% else %}
+                    <span class="label label-default">未指定</span>
+                {% endif %}
+            {% else %}
+                <p>暂未设置日常签到</p>
+            {% endif %}
+        </div>
+    </div>
+    {% for setting in temp_setting %}
+        <div class="panel panel-default">
+            <div class="panel-heading"><b>临时签到 - {{ setting.name }}</b></div>
+            <div class="panel-body">
+                <h4>时间：</h4>
+                <span class="label label-info">{{ setting.date }} {{ setting.time }}</span>
+                <h4>签到区间：</h4>
+                <span class="label label-info">{{ setting.start_time }}</span> - <span
+                    class="label label-info">{{ setting.end_time }}</span>
+                <h4>签到条件：</h4>
+                {% if setting.computer %}
+                    指定计算机：{{ setting.computer.name }}
+                {% else %}
+                    <span class="label label-default">未指定</span>
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+    {% if not temp_setting %}
+        <div class="panel panel-default">
+            <div class="panel-heading"><b>临时签到</b></div>
+            <div class="panel-body">
+                <p>暂无临时签到</p>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block extrascript %}
+    <!-- this page specific script -->
+    <script type="text/javascript">
+        var times = $('input').val() * 1;
+        for (var i = 1; i <= 4; i++) {
+            if (i > times) {
+                $('.t' + i).hide();
+            } else {
+                $('.t' + i).show();
+            }
+        }
+    </script>
+{% endblock %}
