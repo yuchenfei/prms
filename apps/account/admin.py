@@ -14,7 +14,7 @@ def create_password(obj):
 
 
 class TeacherAdmin(admin.ModelAdmin):
-    fields = ('username', 'password')
+    exclude = ('uuid', 'salt', 'group')
 
     def save_model(self, request, obj, form, change):
         create_password(obj)

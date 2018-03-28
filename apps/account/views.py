@@ -39,10 +39,10 @@ def login(request):
         if request.method == 'POST':
             form = TeacherLoginForm(request.POST)
             if form.is_valid():
-                teacher = verify_teacher_by_password(form.cleaned_data['username'], form.cleaned_data['password'])
+                teacher = verify_teacher_by_password(form.cleaned_data['phone'], form.cleaned_data['password'])
                 if teacher:
                     request.session['type'] = 'teacher'
-                    request.session['user'] = teacher.username
+                    request.session['user'] = teacher.phone
                     return redirect('teacher_home')
                 else:
                     form.add_error(None, '密码错误')
@@ -83,11 +83,10 @@ def logout(request):
 def get_login_user(request):
     """返回已登陆的用户实例"""
     user_type = request.session.get('type')
+    phone = request.session.get('user')
     if user_type == 'teacher':
-        username = request.session.get('user')
-        return Teacher.objects.get(username=username)
+        return Teacher.objects.get(phone=phone)
     if user_type == 'postgraduate':
-        phone = request.session.get('user')
         return Postgraduate.objects.get(phone=phone)
 
 
@@ -162,7 +161,7 @@ def table_postgraduate_list(request):
             response_data['rows'].append({
                 "postgraduate_phone": postgraduate.phone,
                 "postgraduate_name": postgraduate.name,
-                "postgraduate_teacher": postgraduate.teacher.username,
+                "postgraduate_teacher": postgraduate.teacher.name,
                 "postgraduate_school": postgraduate.school,
                 "postgraduate_classes": postgraduate.classes,
                 "postgraduate_device": device
@@ -282,11 +281,11 @@ def import_teacher(request):
             rows = worksheet.rows
             for row in rows:
                 line = [col.value for col in row]
-                if len(line) != 1:
+                if len(line) != 4:
                     response_data['upload_file'] = False
                     messages.add_message(request, messages.ERROR, '导入文件格式错误，请参照模板')
                     break
-                if Teacher.objects.filter(username=line[0]).exists():
+                if Teacher.objects.filter(phone=line[0]).exists():
                     messages.add_message(request, messages.WARNING, str(line[0]) + '已在数据库中，将不会导入')
                     continue
     except MultiValueDictKeyError:
@@ -300,11 +299,11 @@ def import_teacher(request):
         teachers = []
         for row in rows:
             line = [col.value for col in row]
-            if line[0] == "用户名(必要)":
+            if line[0] == '手机号(必要)':
                 continue  # 跳过标题
-            if Teacher.objects.filter(username=line[0]).exists():
+            if Teacher.objects.filter(phone=line[0]).exists():
                 continue
-            t = Teacher(username=line[0], password='123456', group=group)
+            t = Teacher(phone=line[0], password=line[0], name=line[1], school=line[2], specialty=line[3])
             create_password(t)
             teachers.append(t)
         Teacher.objects.bulk_create(teachers)
@@ -327,12 +326,16 @@ def table_uploaded_teacher_list(request):
         response_data['rows'] = []
         for row in rows:
             line = [col.value for col in row]
-            if line[0] == "用户名(必要)":
+            if line[0] == '手机号(必要)':
                 continue
-            if Teacher.objects.filter(username=line[0]).exists():
+            if Teacher.objects.filter(phone=line[0]).exists():
                 continue
             response_data['rows'].append({
-                "teacher_username": line[0],
+                'teacher_phone': line[0],
+                'teacher_name': line[1],
+                'teacher_school': line[2],
+                'teacher_specialty': line[3]
+
             })
         if not offset:
             offset = 0

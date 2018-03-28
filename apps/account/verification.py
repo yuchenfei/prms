@@ -5,8 +5,8 @@ import jwt
 from account.models import Teacher, Postgraduate
 
 
-def verify_teacher_by_password(username, password):
-    teacher = Teacher.objects.get(username=username)
+def verify_teacher_by_password(phone, password):
+    teacher = Teacher.objects.get(phone=phone)
     password = hashlib.pbkdf2_hmac('sha256', str.encode(password), str.encode(teacher.salt), 100000).hex()
     if password == teacher.password:
         return teacher

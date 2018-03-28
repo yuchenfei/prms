@@ -26,7 +26,7 @@
         </ul>
         <ul class="nav navbar-nav navbar-right">
             {% if teacher != None %}
-                <li><p class="navbar-text">{{ teacher.username }} 已登陆</p></li>
+                <li><p class="navbar-text">{{ teacher.name }} 已登陆</p></li>
                 <li>
                     <form action="{% url 'logout' %}">
                         <button type="submit" class="btn btn-default navbar-btn">登出</button>

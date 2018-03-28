@@ -5,14 +5,14 @@ from .models import Teacher, Postgraduate, Group
 
 
 class TeacherLoginForm(forms.Form):
-    username = forms.CharField(
+    phone = forms.CharField(
         required=True,
         label=False,
-        error_messages={'required': '用户名不能为空'},
+        error_messages={'required': '手机号不能为空'},
         widget=forms.TextInput(
             attrs={
                 'class': "form-control",
-                'placeholder': '输入用户名',
+                'placeholder': '输入手机号',
             }
         ),
     )
@@ -29,10 +29,10 @@ class TeacherLoginForm(forms.Form):
     )
 
     def clean(self):
-        username = self.cleaned_data['username']
-        is_username_exist = Teacher.objects.filter(username=username).exists()
-        if not is_username_exist:
-            raise forms.ValidationError('用户名不存在')
+        phone = self.cleaned_data['phone']
+        is_phone_exist = Teacher.objects.filter(phone=phone).exists()
+        if not is_phone_exist:
+            raise forms.ValidationError('手机号不存在')
 
         password = self.cleaned_data['password']
         if len(password) < 6:
@@ -69,7 +69,7 @@ class PostgraduateLoginForm(forms.Form):
         phone = self.cleaned_data["phone"]
         is_postgraduate_exist = Postgraduate.objects.filter(phone=phone).exists()
         if not is_postgraduate_exist:
-            raise forms.ValidationError('学号不存在')
+            raise forms.ValidationError('手机号不存在')
 
         password = self.cleaned_data['password']
         if len(password) < 6:
