@@ -216,7 +216,7 @@ def import_postgraduate_list(request):
                 # 跳过已存在的数据
                 continue
             postgraduate = Postgraduate(phone=line[0],
-                                        password=line[0],
+                                        password=str(line[0]),
                                         name=line[1],
                                         teacher=teacher,
                                         school=line[2],
@@ -303,7 +303,7 @@ def import_teacher(request):
                 continue  # 跳过标题
             if Teacher.objects.filter(phone=line[0]).exists():
                 continue
-            t = Teacher(phone=line[0], password=line[0], name=line[1], school=line[2], specialty=line[3])
+            t = Teacher(phone=line[0], password=str(line[0]), name=line[1], school=line[2], specialty=line[3])
             create_password(t)
             teachers.append(t)
         Teacher.objects.bulk_create(teachers)
