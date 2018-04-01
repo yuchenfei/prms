@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'widget_tweaks',
+    'django_cleanup',
     'account.apps.AccountConfig',
     'checkin.apps.CheckinConfig',
     'leave.apps.LeaveConfig',

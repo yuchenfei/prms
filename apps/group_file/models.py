@@ -14,3 +14,4 @@ class GroupFile(models.Model):
     describe = models.CharField(max_length=50)
     file = models.FileField(upload_to=group_directory_path)
     date = models.DateTimeField()
+    show = models.BooleanField(default=False)

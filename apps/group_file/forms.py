@@ -6,11 +6,11 @@ from .models import GroupFile
 class GroupFileForm(ModelForm):
     class Meta:
         model = GroupFile
-        fields = ('title', 'describe', 'file')
+        fields = ('title', 'describe', 'file', 'show')
         labels = {
             'title': '标题',
             'describe': '描述',
-            'file': '文件'
+            'file': '文件',
         }
         widgets = {
             'describe': Textarea(attrs={'cols': 80, 'rows': 20}),

@@ -147,7 +147,7 @@ def table_postgraduate_list(request):
 
         if sort_column:
             sort_column = sort_column.replace('postgraduate_', '')
-            if sort_column in ['id', 'name', 'teacher', 'group']:
+            if sort_column in ['phone', 'name', 'teacher', 'school', 'classes']:
                 if order == 'desc':
                     sort_column = '-{}'.format(sort_column)
                 postgraduates = postgraduates.order_by(sort_column)
