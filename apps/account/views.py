@@ -1,6 +1,7 @@
 import functools
 
 from django.contrib import messages
+from django.core.cache import cache
 from django.core.files.storage import FileSystemStorage
 from django.db.models import Q
 from django.http import JsonResponse, HttpResponse
@@ -31,11 +32,11 @@ def login_required(func):
 
 def login(request):
     """教师、研究生登陆逻辑"""
-    response_data = dict()
+    response = dict()
     # 教师登陆
     if request.path == reverse('teacher_login'):
-        response_data['url'] = reverse('teacher_login')
-        response_data['user_type'] = '教师'
+        response['url'] = reverse('teacher_login')
+        response['user_type'] = '教师'
         if request.method == 'POST':
             form = TeacherLoginForm(request.POST)
             if form.is_valid():
@@ -48,11 +49,11 @@ def login(request):
                     form.add_error(None, '密码错误')
         else:
             form = TeacherLoginForm()
-        response_data['form'] = form
+        response['form'] = form
     # 研究生登陆
     if request.path == reverse('postgraduate_login'):
-        response_data['url'] = reverse('postgraduate_login')
-        response_data['user_type'] = '研究生'
+        response['url'] = reverse('postgraduate_login')
+        response['user_type'] = '研究生'
         if request.method == 'POST':
             form = PostgraduateLoginForm(request.POST)
             if form.is_valid():
@@ -66,8 +67,8 @@ def login(request):
                     form.add_error(None, '密码错误')
         else:
             form = PostgraduateLoginForm()
-        response_data['form'] = form
-    return render(request, 'account/login.html', response_data)
+        response['form'] = form
+    return render(request, 'account/login.html', response)
 
 
 def logout(request):
@@ -103,26 +104,69 @@ def home(request):
 
 @login_required
 def teacher_home(request):
-    teacher = get_login_user(request)
-    return render(request, 'account/home_teacher.html', {'teacher': teacher})
+    response = dict()
+    response['teacher'] = teacher = get_login_user(request)
+    key = str(teacher.uuid) + '_invited'
+    group_id = cache.get(key)
+    if group_id and Group.objects.filter(id=group_id).exists():
+        response['invited'] = Group.objects.get(id=group_id)
+    return render(request, 'account/home_teacher.html', response)
 
 
 @login_required
-def manage_group_teacher(request):
-    """组长管理组成员"""
-    response_data = dict()
-    response_data['teacher'] = teacher = get_login_user(request)
+def members(request):
+    response = dict()
+    response['teacher'] = teacher = get_login_user(request)
+    response['members'] = Teacher.objects.filter(group__leader=teacher).all()
+    return render(request, 'account/members.html', response)
+
+
+@login_required
+def invite(request):
+    response = dict()
+    response['teacher'] = teacher = get_login_user(request)
     if request.method == 'POST':
         form = GroupTeacherMemberForm(data=request.POST, teacher=teacher)
         if form.is_valid():
             group = Group.objects.get(leader=teacher)
             for t in form.cleaned_data['teacher_member']:
-                t.group = group
-                t.save()
+                key = str(t.uuid) + '_invited'
+                cache.set(key, group.id, None)
+            messages.add_message(request, messages.INFO, '邀请发送成功')
+            return redirect('teacher_home')
     else:
         form = GroupTeacherMemberForm(teacher=teacher)
-    response_data['form'] = form
-    return render(request, 'account/manage_group_teacher.html', response_data)
+    response['form'] = form
+    return render(request, 'account/invite.html', response)
+
+
+@login_required
+def handle_invite(request, group_id):
+    teacher = get_login_user(request)
+    if request.method == 'POST':
+        group = Group.objects.get(id=group_id)
+        result = request.POST.get('result')
+        if result == 'approve':
+            teacher.group = group
+            teacher.save()
+            messages.add_message(request, messages.INFO, '已加入{}课题组'.format(group.name))
+        elif result == 'reject':
+            messages.add_message(request, messages.INFO, '已拒绝{}的邀请'.format(group.leader.name))
+        key = str(teacher.uuid) + '_invited'
+        cache.delete(key)
+        return redirect('teacher_home')
+
+
+@login_required
+def remove(request):
+    if request.method == 'GET':
+        uuid = request.GET.get('uuid')
+        if uuid:
+            teacher = Teacher.objects.get(uuid=uuid)
+            teacher.group = None
+            teacher.save()
+            messages.add_message(request, messages.INFO, '{} 已被移出组'.format(teacher.name))
+    return redirect('g_members')
 
 
 @login_required
@@ -152,13 +196,13 @@ def table_postgraduate_list(request):
                     sort_column = '-{}'.format(sort_column)
                 postgraduates = postgraduates.order_by(sort_column)
 
-        response_data = {'total': postgraduates.count(), 'rows': []}
+        response = {'total': postgraduates.count(), 'rows': []}
         for postgraduate in postgraduates:
             device = '未绑定'
             if Device.objects.filter(postgraduate=postgraduate).exists():
                 if Device.objects.get(postgraduate=postgraduate).imei:
                     device = '已绑定'
-            response_data['rows'].append({
+            response['rows'].append({
                 "postgraduate_phone": postgraduate.phone,
                 "postgraduate_name": postgraduate.name,
                 "postgraduate_teacher": postgraduate.teacher.name,
@@ -170,21 +214,21 @@ def table_postgraduate_list(request):
             offset = 0
         if not limit:
             limit = 20
-        response_data['rows'] = response_data['rows'][offset:offset + limit]
-        return JsonResponse(response_data)
+        response['rows'] = response['rows'][offset:offset + limit]
+        return JsonResponse(response)
 
 
 @login_required
 def import_postgraduate_list(request):
     teacher = get_login_user(request)
-    response_data = {'teacher': teacher}
+    response = {'teacher': teacher}
     try:
         if request.method == 'POST' and request.FILES['excel']:
             excel = request.FILES['excel']
             fs = FileSystemStorage()
             fs.delete(UPLOAD_XLSX_FILE)  # 删除暂存文件
             fs.save(UPLOAD_XLSX_FILE, excel)  # 暂存media文件夹中
-            response_data['upload_file'] = True
+            response['upload_file'] = True
             # 检查文件
             workbook = load_workbook(fs.path(UPLOAD_XLSX_FILE))
             sheet_names = workbook.get_sheet_names()
@@ -193,7 +237,7 @@ def import_postgraduate_list(request):
             for row in rows:
                 line = [col.value for col in row]
                 if len(line) != 4:
-                    response_data['upload_file'] = False
+                    response['upload_file'] = False
                     messages.add_message(request, messages.ERROR, '导入文件格式错误，请参照模板')
                     break
                 if Postgraduate.objects.filter(phone=line[0]).exists():
@@ -226,7 +270,7 @@ def import_postgraduate_list(request):
         Postgraduate.objects.bulk_create(postgraduates)
         fs.delete(UPLOAD_XLSX_FILE)  # 删除暂存文件
         return redirect('postgraduate_list')
-    return render(request, 'account/import_postgraduate_list.html', response_data)
+    return render(request, 'account/import_postgraduate_list.html', response)
 
 
 @login_required
@@ -239,15 +283,15 @@ def table_uploaded_postgraduate_list(request):
         sheet_names = workbook.get_sheet_names()
         worksheet = workbook.get_sheet_by_name(sheet_names[0])
         rows = worksheet.rows
-        response_data = dict()
-        response_data['rows'] = []
+        response = dict()
+        response['rows'] = []
         for row in rows:
             line = [col.value for col in row]
             if line[0] == "手机号(必要)":
                 continue
             if Postgraduate.objects.filter(phone=line[0]).exists():
                 continue
-            response_data['rows'].append({
+            response['rows'].append({
                 "postgraduate_phone": line[0],
                 "postgraduate_name": line[1],
                 "postgraduate_school": line[2],
@@ -257,15 +301,15 @@ def table_uploaded_postgraduate_list(request):
             offset = 0
         if not limit:
             limit = 20
-        response_data['total'] = len(response_data['rows'])
-        response_data['rows'] = response_data['rows'][offset:offset + limit]
-        return JsonResponse(response_data)
+        response['total'] = len(response['rows'])
+        response['rows'] = response['rows'][offset:offset + limit]
+        return JsonResponse(response)
 
 
 @login_required
 def import_teacher(request):
-    response_data = dict()
-    response_data['teacher'] = teacher = get_login_user(request)
+    response = dict()
+    response['teacher'] = teacher = get_login_user(request)
     group = Group.objects.get(leader=teacher)
     try:
         if request.method == 'POST' and request.FILES['excel']:
@@ -273,7 +317,7 @@ def import_teacher(request):
             fs = FileSystemStorage()
             fs.delete(UPLOAD_XLSX_FILE)  # 删除暂存文件
             fs.save(UPLOAD_XLSX_FILE, excel)  # 暂存media文件夹中
-            response_data['upload_file'] = True
+            response['upload_file'] = True
             # 检查文件
             workbook = load_workbook(fs.path(UPLOAD_XLSX_FILE))
             sheet_names = workbook.get_sheet_names()
@@ -282,7 +326,7 @@ def import_teacher(request):
             for row in rows:
                 line = [col.value for col in row]
                 if len(line) != 4:
-                    response_data['upload_file'] = False
+                    response['upload_file'] = False
                     messages.add_message(request, messages.ERROR, '导入文件格式错误，请参照模板')
                     break
                 if Teacher.objects.filter(phone=line[0]).exists():
@@ -309,7 +353,7 @@ def import_teacher(request):
         Teacher.objects.bulk_create(teachers)
         fs.delete(UPLOAD_XLSX_FILE)  # 删除暂存文件
         return HttpResponse('OK')
-    return render(request, 'account/import_teacher_list.html', response_data)
+    return render(request, 'account/import_teacher_list.html', response)
 
 
 @login_required
@@ -322,15 +366,15 @@ def table_uploaded_teacher_list(request):
         sheet_names = workbook.get_sheet_names()
         worksheet = workbook.get_sheet_by_name(sheet_names[0])
         rows = worksheet.rows
-        response_data = dict()
-        response_data['rows'] = []
+        response = dict()
+        response['rows'] = []
         for row in rows:
             line = [col.value for col in row]
             if line[0] == '手机号(必要)':
                 continue
             if Teacher.objects.filter(phone=line[0]).exists():
                 continue
-            response_data['rows'].append({
+            response['rows'].append({
                 'teacher_phone': line[0],
                 'teacher_name': line[1],
                 'teacher_school': line[2],
@@ -341,9 +385,9 @@ def table_uploaded_teacher_list(request):
             offset = 0
         if not limit:
             limit = 20
-        response_data['total'] = len(response_data['rows'])
-        response_data['rows'] = response_data['rows'][offset:offset + limit]
-        return JsonResponse(response_data)
+        response['total'] = len(response['rows'])
+        response['rows'] = response['rows'][offset:offset + limit]
+        return JsonResponse(response)
 
 
 @login_required

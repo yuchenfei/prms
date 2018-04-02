@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>组教师列表</h2>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-info" role="alert">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+    <table class="table">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>手机号</th>
+            <th>姓名</th>
+            <th>学校</th>
+            <th>专业</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for member in members %}
+            <tr>
+                <th scope="row">{{ forloop.counter }}</th>
+                <td>{{ member.phone }}</td>
+                <td>{{ member.name }}</td>
+                <td>{{ member.school|default_if_none:'未填写' }}</td>
+                <td>{{ member.specialty|default_if_none:'未填写' }}</td>
+                <td>
+                    {% if member != teacher %}
+                        <a class="btn btn-danger btn-sm" href="{% url 'g_remove' %}?uuid={{ member.uuid }}">移出组</a>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+

@@ -7,12 +7,15 @@
                     <a href="{% url 'teacher_home' %}">首页</a>
                 </li>
                 {% if teacher.is_leader %}
-                    <li class="sub-menu {% nav_class 'group_file_list' 'group_file_upload' %}">
+                    <li class="sub-menu {% nav_class 'g_members' 'g_invite' 'group_file_list' 'group_file_upload' %}">
                         <a href="javascript:void(0);">课题组管理<i class="glyphicon glyphicon-chevron-right pull-right"></i></a>
                         <ul>
-                            <li><a href="{% url 'manage_group_teacher' %}">小组教师管理（待移除）</a></li>
-                            <li><a href="#">组教师列表</a></li>
-                            <li><a href="#">邀请教师</a></li>
+                            <li class="{% nav_class 'g_members' %}">
+                                <a href="{% url 'g_members' %}">组教师列表</a>
+                            </li>
+                            <li class="{% nav_class 'g_invite' %}">
+                                <a href="{% url 'g_invite' %}">邀请教师</a>
+                            </li>
                             <li class="{% nav_class 'group_file_list' %}">
                                 <a href="{% url 'group_file_list' %}">文件列表</a>
                             </li>
@@ -21,7 +24,7 @@
                             </li>
                         </ul>
                     </li>
-                {% else %}
+                {% elif teacher.group %}
                     <li class="sub-menu {% nav_class 'group_file_list' 'group_file_upload' %}">
                         <a href="javascript:void(0);">课题组功能<i class="glyphicon glyphicon-chevron-right pull-right"></i></a>
                         <ul>

@@ -1,5 +1,44 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h2>最新的消息。。。</h2>
+    <h2>最新的消息</h2>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-info" role="alert">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+    {% if invited %}
+        <div class="panel panel-default">
+            <div class="panel-body">
+                {{ invited.leader.name }} 邀请您加入 {{ invited.name }} 课题组
+            </div>
+            <div class="panel-footer clearfix">
+                <div class="pull-right">
+                    <form action="{% url 'g_handle_invite' invited.id %}" method="post">
+                        {% csrf_token %}
+                        <input type="text" name="result" hidden>
+                        <input type="button" class="btn btn-success" value="同意">
+                        <input type="button" class="btn btn-danger" value="拒绝">
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block extrascript %}
+    <script>
+        $(document).ready(function () {
+            $("input:button").click(function () {
+                var form = $(this).parent("form");
+                var result = form.find("input[name='result']");
+                if ($(this).val() === '同意') {
+                    result.val('approve');
+                } else {
+                    result.val('reject');
+                }
+                form.submit();
+            });
+        })
+    </script>
 {% endblock %}
