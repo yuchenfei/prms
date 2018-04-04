@@ -7,6 +7,8 @@ from Crypto.Cipher import PKCS1_OAEP
 from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
 from datetime import datetime
+
+from django.db.models import Q
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
@@ -95,7 +97,13 @@ def items(request):
             else:
                 json['daily_times'] = 0
             # 临时签到相关
-            temp_setting = TempCheckInSetting.objects.filter(teacher=postgraduate.teacher, date=datetime.today()).all()
+            if postgraduate.teacher.group:
+                q1 = Q(teacher=postgraduate.teacher, date=datetime.today())
+                q2 = Q(teacher__group=postgraduate.teacher.group, is_group=True, date=datetime.today())
+                temp_setting = TempCheckInSetting.objects.filter(q1 | q2).all()
+            else:
+                temp_setting = TempCheckInSetting.objects.filter(teacher=postgraduate.teacher,
+                                                                 date=datetime.today()).all()
             for setting in temp_setting:
                 json['temp_id'].append(setting.id)
                 json['temp_time'].append(setting.time.strftime('%H:%M'))
@@ -163,7 +171,7 @@ def check_in(request):
                                 # 签到设置中限定计算机，且计算机不符
                                 return JsonResponse(json)
                         # 检查日期
-                        if setting.date != datetime.today():
+                        if setting.date != datetime.today().date():
                             json['status_code'] = -2
                             return JsonResponse(json)
                         # 检查时间是否符合设置区间

@@ -18,6 +18,7 @@ class TempCheckInSetting(models.Model):
     time = models.TimeField()
     start_time = models.TimeField()
     end_time = models.TimeField()
+    is_group = models.BooleanField(default=False)
     computer = models.ForeignKey(Computer, blank=True, null=True)
 
 

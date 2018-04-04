@@ -3,12 +3,38 @@
 {% block content %}
     <h2>临时签到列表</h2>
     {% for item in items %}
-        {{ item.name }}
-        {{ item.date }}
-        {{ item.time }}
-        {{ item.start_time }}
-        {{ item.end_time }}
-        {{ item.computer }}
-        <br>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <b>临时签到 - {{ item.name }}</b>
+                {% if item.is_group %}
+                    <div class="pull-right">
+                        <span class="label label-info">组签到</span>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="panel-body">
+                <h4>教师：</h4>
+                <span class="label label-info">{{ item.teacher.name }}</span>
+                <h4>时间：</h4>
+                <span class="label label-info">{{ item.date }} {{ item.time }}</span>
+                <h4>签到区间：</h4>
+                <span class="label label-info">{{ item.start_time }}</span> - <span
+                    class="label label-info">{{ item.end_time }}</span>
+                <h4>签到条件：</h4>
+                {% if item.computer %}
+                    指定计算机：{{ item.computer.name }}
+                {% else %}
+                    <span class="label label-default">未指定</span>
+                {% endif %}
+            </div>
+        </div>
     {% endfor %}
+    {% if not items %}
+        <div class="panel panel-default">
+            <div class="panel-heading"><b>临时签到</b></div>
+            <div class="panel-body">
+                <p>暂无临时签到</p>
+            </div>
+        </div>
+    {% endif %}
 {% endblock %}

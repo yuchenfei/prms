@@ -44,8 +44,17 @@
     </div>
     {% for setting in temp_setting %}
         <div class="panel panel-default">
-            <div class="panel-heading"><b>临时签到 - {{ setting.name }}</b></div>
+            <div class="panel-heading">
+                <b>临时签到 - {{ setting.name }}</b>
+                {% if setting.is_group %}
+                    <div class="pull-right">
+                        <span class="label label-info">组签到</span>
+                    </div>
+                {% endif %}
+            </div>
             <div class="panel-body">
+                <h4>教师：</h4>
+                <span class="label label-info">{{ setting.teacher.name }}</span>
                 <h4>时间：</h4>
                 <span class="label label-info">{{ setting.date }} {{ setting.time }}</span>
                 <h4>签到区间：</h4>

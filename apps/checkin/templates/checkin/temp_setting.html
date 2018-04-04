@@ -56,6 +56,9 @@
             {{ form.computer.label_tag }}
             {{ form.computer|add_class:"form-control" }}
         </div>
+        <div class="checkbox">
+            <label>{{ form.is_group }}全组可见</label>
+        </div>
         <div class="pull-right">
             <input class="btn btn-primary" type="submit" value="保存">
             <input class="btn btn-danger" type="button" value="取消">

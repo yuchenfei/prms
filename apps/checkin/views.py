@@ -2,6 +2,7 @@ import time
 from datetime import datetime
 
 import qrcode
+from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
@@ -31,7 +32,11 @@ def temp_list(request):
     response_data = dict()
     teacher = get_login_user(request)
     response_data['teacher'] = teacher
-    response_data['items'] = TempCheckInSetting.objects.filter(teacher=teacher).all()
+    if teacher.group:
+        response_data['items'] = TempCheckInSetting.objects.filter(
+            Q(teacher=teacher) | Q(teacher__group=teacher.group, is_group=True)).all()
+    else:
+        response_data['items'] = TempCheckInSetting.objects.filter(teacher=teacher).all()
     return render(request, 'checkin/temp_list.html', response_data)
 
 
