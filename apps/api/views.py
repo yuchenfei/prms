@@ -41,6 +41,7 @@ def auth(request):
             else:
                 if not postgraduate.device.imei:
                     postgraduate.device.imei = imei
+                    postgraduate.device.save()
                 elif postgraduate.device.imei != imei:
                     json['reason'] = 1
                     return JsonResponse(json)
@@ -65,9 +66,11 @@ def items(request):
         'auth_result': False,
         'daily_times': 1,
         'daily_time_interval': '',
-        'daily_status': 0,
+        'daily_ok': [],
         'temp_id': [],
+        'temp_name': [],
         'temp_time': [],
+        'temp_time_interval': [],
         'temp_ok': []
     }
     if request.method == 'POST':
@@ -93,7 +96,7 @@ def items(request):
                     for i in range(times):
                         index = i + 1
                         if getattr(today_check_in[0], 'check{}'.format(index)):
-                            json['daily_status'] = index
+                            json['daily_ok'].append(index)
             else:
                 json['daily_times'] = 0
             # 临时签到相关
@@ -106,12 +109,15 @@ def items(request):
                                                                  date=datetime.today()).all()
             for setting in temp_setting:
                 json['temp_id'].append(setting.id)
+                json['temp_name'].append(setting.name)
                 json['temp_time'].append(setting.time.strftime('%H:%M'))
-            records_ok = TempCheckIn.objects.filter(target__in=temp_setting, postgraduate=postgraduate).all()
-            for record in records_ok:
-                json['temp_ok'].append(record.target.id)
-            print(json)
-    return JsonResponse(json)
+                json['temp_time_interval'].append('{}-{}'.format(setting.start_time.strftime('%H:%M'),
+                                                                 setting.end_time.strftime('%H:%M')))
+                records_ok = TempCheckIn.objects.filter(target__in=temp_setting, postgraduate=postgraduate).all()
+                for record in records_ok:
+                    json['temp_ok'].append(record.target.id)
+        print(json)
+        return JsonResponse(json)
 
 
 @csrf_exempt
@@ -179,7 +185,8 @@ def check_in(request):
                             json['status_code'] = -2
                             return JsonResponse(json)
                         # 条件均符合，执行签到
-                        TempCheckIn.objects.create(target=setting, postgraduate=postgraduate, date_time=datetime.now())
+                        TempCheckIn.objects.create(target=setting, postgraduate=postgraduate,
+                                                   date_time=datetime.now())
                         json['status_code'] = 1
                 else:
                     # 扫描的是长期二维码，创建短期二维码
