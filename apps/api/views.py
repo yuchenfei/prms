@@ -113,9 +113,9 @@ def items(request):
                 json['temp_time'].append(setting.time.strftime('%H:%M'))
                 json['temp_time_interval'].append('{}-{}'.format(setting.start_time.strftime('%H:%M'),
                                                                  setting.end_time.strftime('%H:%M')))
-                records_ok = TempCheckIn.objects.filter(target__in=temp_setting, postgraduate=postgraduate).all()
-                for record in records_ok:
-                    json['temp_ok'].append(record.target.id)
+            records_ok = TempCheckIn.objects.filter(target__in=temp_setting, postgraduate=postgraduate).all()
+            for record in records_ok:
+                json['temp_ok'].append(record.target.id)
         print(json)
         return JsonResponse(json)
 
