@@ -192,7 +192,7 @@ def check_in(request):
                     # 扫描的是长期二维码，创建短期二维码
                     check_in_code.generate_code('s')
                     json['status_code'] = 0
-    return JsonResponse(json)
+        return JsonResponse(json)
 
 
 def decrypt_data(data):
