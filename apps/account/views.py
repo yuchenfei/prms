@@ -234,6 +234,7 @@ def import_postgraduate_list(request):
             sheet_names = workbook.get_sheet_names()
             worksheet = workbook.get_sheet_by_name(sheet_names[0])
             rows = worksheet.rows
+            waring = []
             for row in rows:
                 line = [col.value for col in row]
                 if len(line) != 4:
@@ -241,8 +242,11 @@ def import_postgraduate_list(request):
                     messages.add_message(request, messages.ERROR, '导入文件格式错误，请参照模板')
                     break
                 if Postgraduate.objects.filter(phone=line[0]).exists():
-                    messages.add_message(request, messages.WARNING, str(line[0]) + '已在数据库中，将不会导入')
+                    waring.append(line[0])
                     continue
+            if len(waring) > 0:
+                messages.add_message(request, messages.WARNING, ','.join(waring) + '已在数据库中，将不会导入')
+
     except MultiValueDictKeyError:
         return redirect('import_postgraduate_list')
     if request.method == 'GET' and request.GET.get('confirm') == 'true':
@@ -323,6 +327,7 @@ def import_teacher(request):
             sheet_names = workbook.get_sheet_names()
             worksheet = workbook.get_sheet_by_name(sheet_names[0])
             rows = worksheet.rows
+            waring = []
             for row in rows:
                 line = [col.value for col in row]
                 if len(line) != 4:
@@ -330,8 +335,10 @@ def import_teacher(request):
                     messages.add_message(request, messages.ERROR, '导入文件格式错误，请参照模板')
                     break
                 if Teacher.objects.filter(phone=line[0]).exists():
-                    messages.add_message(request, messages.WARNING, str(line[0]) + '已在数据库中，将不会导入')
+                    waring.append(line[0])
                     continue
+            if len(waring) > 0:
+                messages.add_message(request, messages.WARNING, ', '.join(waring) + ' 已在数据库中，将不会导入')
     except MultiValueDictKeyError:
         return redirect('import_teacher')
     if request.method == 'GET' and request.GET.get('confirm') == 'true':

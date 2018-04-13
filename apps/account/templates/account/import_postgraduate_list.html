@@ -5,17 +5,13 @@
     <link href="{% static 'bootstrap-table/css/bootstrap-table.min.css' %}" rel="stylesheet">
 {% endblock %}
 
-{% block extrascript %}
-    <script src="{% static 'bootstrap-table/js/bootstrap-table.min.js' %}"></script>
-    <script src="{% static 'bootstrap-table/js/locales/bootstrap-table-zh-CN.min.js' %}"></script>
-{% endblock %}
-
 {% block content %}
     <h2>导入学生</h2>
     <form action="" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <label class="btn btn-info" for="file">选择文件</label>
         <input id="file" name="excel" type="file" style="display: none">
+        <span class="showFileName"></span>
         <input class="btn btn-primary" type="submit" value="上传">
     </form>
     <br>
@@ -59,4 +55,22 @@
             </div>
         </form>
     {% endif %}
+{% endblock %}
+
+{% block extrascript %}
+    <script src="{% static 'bootstrap-table/js/bootstrap-table.min.js' %}"></script>
+    <script src="{% static 'bootstrap-table/js/locales/bootstrap-table-zh-CN.min.js' %}"></script>
+    <script>
+        $("#file").on("change", function () {
+            var filePath = $(this).val();
+            if (filePath.indexOf("xlsx") != -1 || filePath.indexOf("xls") != -1) {
+                var arr = filePath.split('\\');
+                var fileName = arr[arr.length - 1];
+                $(".showFileName").html(fileName);
+            } else {
+                $(".showFileName").html("您未上传文件，或者您上传文件类型有误！");
+                return false
+            }
+        })
+    </script>
 {% endblock %}
