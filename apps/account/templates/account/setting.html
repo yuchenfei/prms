@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% load widget_tweaks %}
+    <h2>个人设置</h2>
+    <form method="post" id="settingForm">
+        {% csrf_token %}
+        <h3>基础信息</h3>
+        {% for field in form %}
+            {% if field.errors %}
+                <div class="form-group has-error">
+                    {{ field.label_tag }}
+                    {{ field|add_class:"input-lg form-control" }}
+                    <span class="help-block">{{ field.errors }}</span>
+                </div>
+            {% else %}
+                <div class="form-group">
+                    {{ field.label_tag }}
+                    {{ field|add_class:"input-lg form-control" }}
+                </div>
+            {% endif %}
+        {% endfor %}
+        <h3>修改密码</h3>
+        <input class="input-lg form-control" id="password1" name="password1" type="password" placeholder="新密码"
+               autocomplete="off">
+        <div class="row">
+            <div class="col-sm-6">
+                <span id="8char" class="glyphicon glyphicon-remove" style="color:#FF0004;"></span> 8个字符<br>
+                <span id="ucase" class="glyphicon glyphicon-remove" style="color:#FF0004;"></span> 1个大写字符
+            </div>
+            <div class="col-sm-6">
+                <span id="lcase" class="glyphicon glyphicon-remove" style="color:#FF0004;"></span> 1个小写字符<br>
+                <span id="num" class="glyphicon glyphicon-remove" style="color:#FF0004;"></span> 1个数字
+            </div>
+        </div>
+        <input class="input-lg form-control" id="password2" name="password2" type="password" placeholder="重复密码"
+               autocomplete="off">
+        <div class="row">
+            <div class="col-sm-12">
+                <span id="pwmatch" class="glyphicon glyphicon-remove" style="color:#FF0004;"></span> 密码匹配
+            </div>
+        </div>
+        <h3>确认身份</h3>
+        <div class="form-group">
+            <input class="input-lg form-control" id="password" name="password" type="password" placeholder="密码"
+                   autocomplete="off">
+        </div>
+        {% for message in messages %}
+            {% if message.level == DEFAULT_MESSAGE_LEVELS.WARNING %}
+                <div class="alert alert-danger" role="alert">{{ message }}</div>
+            {% else %}
+                <div class="alert alert-success" role="alert">{{ message }}</div>
+            {% endif %}
+        {% endfor %}
+        <div class="js_message"></div>
+        <div class="pull-right">
+            <input class="btn btn-primary" onclick="checkNewPassword()" type="button" value="修改">
+        </div>
+    </form>
+{% endblock %}
+
+{% block extrascript %}
+    <script>
+        $("input[type=password]").keyup(function () {
+            var ucase = new RegExp("[A-Z]+");
+            var lcase = new RegExp("[a-z]+");
+            var num = new RegExp("[0-9]+");
+
+            if ($("#password1").val().length >= 8) {
+                $("#8char").removeClass("glyphicon-remove");
+                $("#8char").addClass("glyphicon-ok");
+                $("#8char").css("color", "#00A41E");
+            } else {
+                $("#8char").removeClass("glyphicon-ok");
+                $("#8char").addClass("glyphicon-remove");
+                $("#8char").css("color", "#FF0004");
+            }
+
+            if (ucase.test($("#password1").val())) {
+                $("#ucase").removeClass("glyphicon-remove");
+                $("#ucase").addClass("glyphicon-ok");
+                $("#ucase").css("color", "#00A41E");
+            } else {
+                $("#ucase").removeClass("glyphicon-ok");
+                $("#ucase").addClass("glyphicon-remove");
+                $("#ucase").css("color", "#FF0004");
+            }
+
+            if (lcase.test($("#password1").val())) {
+                $("#lcase").removeClass("glyphicon-remove");
+                $("#lcase").addClass("glyphicon-ok");
+                $("#lcase").css("color", "#00A41E");
+            } else {
+                $("#lcase").removeClass("glyphicon-ok");
+                $("#lcase").addClass("glyphicon-remove");
+                $("#lcase").css("color", "#FF0004");
+            }
+
+            if (num.test($("#password1").val())) {
+                $("#num").removeClass("glyphicon-remove");
+                $("#num").addClass("glyphicon-ok");
+                $("#num").css("color", "#00A41E");
+            } else {
+                $("#num").removeClass("glyphicon-ok");
+                $("#num").addClass("glyphicon-remove");
+                $("#num").css("color", "#FF0004");
+            }
+
+            if ($("#password1").val()) {
+                if ($("#password1").val() == $("#password2").val()) {
+                    $("#pwmatch").removeClass("glyphicon-remove");
+                    $("#pwmatch").addClass("glyphicon-ok");
+                    $("#pwmatch").css("color", "#00A41E");
+                } else {
+                    $("#pwmatch").removeClass("glyphicon-ok");
+                    $("#pwmatch").addClass("glyphicon-remove");
+                    $("#pwmatch").css("color", "#FF0004");
+                }
+            }
+        });
+
+        function checkNewPassword() {
+            if ($("#password1").val()) {
+                if (!$("#pwmatch").hasClass("glyphicon-ok") ||
+                    !$("#8char").hasClass("glyphicon-ok") ||
+                    !$("#ucase").hasClass("glyphicon-ok") ||
+                    !$("#lcase").hasClass("glyphicon-ok") ||
+                    !$("#num").hasClass("glyphicon-ok")
+                ) {
+                    $(".js_message").html("<div class=\"alert alert-danger\" role=\"alert\">密码设置不符合要求</div>");
+                    return false;
+                }
+            }
+            $("#settingForm").submit();
+        }
+    </script>
+{% endblock %}

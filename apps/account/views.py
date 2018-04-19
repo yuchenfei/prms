@@ -12,7 +12,7 @@ from openpyxl import load_workbook
 
 from api.models import Device
 from .admin import create_password
-from .forms import TeacherLoginForm, PostgraduateLoginForm, GroupTeacherMemberForm
+from .forms import TeacherLoginForm, PostgraduateLoginForm, GroupTeacherMemberForm, TeacherForm, PostgraduateForm
 from .models import Teacher, Postgraduate, Group
 from .verification import verify_teacher_by_password, verify_postgraduate_by_password
 
@@ -401,3 +401,55 @@ def table_uploaded_teacher_list(request):
 def postgraduate_home(request):
     postgraduate = get_login_user(request)
     return render(request, 'account/home_postgraduate.html', {'postgraduate': postgraduate})
+
+
+@login_required
+def setting_t(request):
+    response = dict()
+    response['teacher'] = teacher = get_login_user(request)
+    if request.method == 'POST':
+        form = TeacherForm(request.POST, instance=teacher)
+        password = request.POST.get('password')
+        password_new = request.POST.get('password1')
+        if verify_teacher_by_password(teacher.phone, password):
+            if form.is_valid():
+                if form.has_changed():
+                    form.save()
+                    messages.add_message(request, messages.INFO, '个人资料修改成功')
+            if password_new:
+                teacher.password = password_new
+                create_password(teacher)
+                teacher.save()
+                messages.add_message(request, messages.INFO, '密码修改成功')
+        else:
+            messages.add_message(request, messages.WARNING, '密码错误')
+    else:
+        form = TeacherForm(instance=teacher)
+    response['form'] = form
+    return render(request, 'account/setting.html', response)
+
+
+@login_required
+def setting_p(request):
+    response = dict()
+    response['postgraduate'] = postgraduate = get_login_user(request)
+    if request.method == 'POST':
+        form = PostgraduateForm(request.POST, instance=postgraduate)
+        password = request.POST.get('password')
+        password_new = request.POST.get('password1')
+        if verify_teacher_by_password(postgraduate.phone, password):
+            if form.is_valid():
+                if form.has_changed():
+                    form.save()
+                    messages.add_message(request, messages.INFO, '个人资料修改成功')
+            if password_new:
+                postgraduate.password = password_new
+                create_password(postgraduate)
+                postgraduate.save()
+                messages.add_message(request, messages.INFO, '密码修改成功')
+        else:
+            messages.add_message(request, messages.WARNING, '密码错误')
+    else:
+        form = PostgraduateForm(instance=postgraduate)
+    response['form'] = form
+    return render(request, 'account/setting.html', response)
