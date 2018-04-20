@@ -11,6 +11,14 @@
 {% endblock %}
 
 {% block content %}
+    <h2>研究生列表</h2>
+    {% for message in messages %}
+        {% if message.level == DEFAULT_MESSAGE_LEVELS.WARNING %}
+            <div class="alert alert-danger" role="alert">{{ message }}</div>
+        {% else %}
+            <div class="alert alert-success" role="alert">{{ message }}</div>
+        {% endif %}
+    {% endfor %}
     <table data-toggle="table"
            data-url="{% url 'table_postgraduate_list' %}"
            data-pagination="true"

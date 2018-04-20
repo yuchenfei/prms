@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% load widget_tweaks %}
+    <h2>添加研究生</h2>
+    <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+            {% if field.errors %}
+                <div class="form-group has-error">
+                    {{ field.label_tag }}
+                    {{ field|add_class:"input-lg form-control" }}
+                    <span class="help-block">{{ field.errors }}</span>
+                </div>
+            {% else %}
+                <div class="form-group">
+                    {{ field.label_tag }}
+                    {{ field|add_class:"input-lg form-control" }}
+                </div>
+            {% endif %}
+        {% endfor %}
+        {% for message in messages %}
+            {% if message.level == DEFAULT_MESSAGE_LEVELS.WARNING %}
+                <div class="alert alert-danger" role="alert">{{ message }}</div>
+            {% else %}
+                <div class="alert alert-success" role="alert">{{ message }}</div>
+            {% endif %}
+        {% endfor %}
+        <div class="pull-right">
+            <input class="btn btn-primary" type="submit" value="提交">
+        </div>
+    </form>
+{% endblock %}

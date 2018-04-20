@@ -9,6 +9,9 @@ from .models import Teacher, Postgraduate, Group
 def create_password(obj):
     # 创建盐
     obj.salt = urandom(32).hex()
+    # 缺省密码为手机号码
+    if not obj.password:
+        obj.password = obj.phone
     # 生成密码摘要
     obj.password = hashlib.pbkdf2_hmac('sha256', str.encode(obj.password), str.encode(obj.salt), 100000).hex()
 

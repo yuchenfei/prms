@@ -17,8 +17,9 @@ urlpatterns = [
     url(r'^teacher/group/handle_invite/(\d+)/$', views.handle_invite, name='g_handle_invite'),  # 处理邀请
     url(r'^teacher/group/remove$', views.remove, name='g_remove'),  # 移出教师
 
-    url(r'^teacher/postgraduates$', views.postgraduate_list, name='postgraduate_list'),  # 研究生首页
-    url(r'^teacher/table_postgraduate_list$', views.table_postgraduate_list, name='table_postgraduate_list'),  # 研究生列表
+    url(r'^teacher/postgraduates$', views.postgraduate_list, name='postgraduate_list'),  # 研究生列表页面
+    url(r'^teacher/table_postgraduate_list$', views.table_postgraduate_list, name='table_postgraduate_list'),  # 研究生列表数据
+    url(r'^teacher/postgraduates/add$', views.add_postgraduate, name='add_postgraduate'),
 
     # 导入研究生
     url(r'^teacher/import_postgraduate_list$', views.import_postgraduate_list, name='import_postgraduate_list'),

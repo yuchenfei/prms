@@ -219,6 +219,25 @@ def table_postgraduate_list(request):
 
 
 @login_required
+def add_postgraduate(request):
+    response = dict()
+    response['teacher'] = teacher = get_login_user(request)
+    if request.method == 'POST':
+        form = PostgraduateForm(request.POST)
+        if form.is_valid():
+            postgraduate = form.save(commit=False)
+            postgraduate.teacher = teacher
+            create_password(postgraduate)
+            postgraduate.save()
+            messages.add_message(request, messages.INFO, '添加成功')
+            return redirect('postgraduate_list')
+    else:
+        form = PostgraduateForm()
+    response['form'] = form
+    return render(request, 'account/add_postgraduate.html', response)
+
+
+@login_required
 def import_postgraduate_list(request):
     teacher = get_login_user(request)
     response = {'teacher': teacher}

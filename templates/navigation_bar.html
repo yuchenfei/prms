@@ -37,11 +37,14 @@
                         </ul>
                     </li>
                 {% endif %}
-                <li class="sub-menu {% nav_class 'postgraduate_list' %}">
+                <li class="sub-menu {% nav_class 'postgraduate_list' 'add_postgraduate' %}">
                     <a href="javascript:void(0);">研究生管理<i class="glyphicon glyphicon-chevron-right pull-right"></i></a>
                     <ul>
                         <li class="{% nav_class 'postgraduate_list' %}">
-                            <a href="{% url 'postgraduate_list' %}">学生列表</a>
+                            <a href="{% url 'postgraduate_list' %}">研究生列表</a>
+                        </li>
+                        <li class="{% nav_class 'add_postgraduate' %}">
+                            <a href="{% url 'add_postgraduate' %}">添加研究生</a>
                         </li>
                     </ul>
                 </li>
