@@ -5,11 +5,6 @@
     <link href="{% static 'bootstrap-table/css/bootstrap-table.min.css' %}" rel="stylesheet">
 {% endblock %}
 
-{% block extrascript %}
-    <script src="{% static 'bootstrap-table/js/bootstrap-table.min.js' %}"></script>
-    <script src="{% static 'bootstrap-table/js/locales/bootstrap-table-zh-CN.min.js' %}"></script>
-{% endblock %}
-
 {% block content %}
     <h2>研究生列表</h2>
     {% for message in messages %}
@@ -19,25 +14,69 @@
             <div class="alert alert-success" role="alert">{{ message }}</div>
         {% endif %}
     {% endfor %}
-    <table data-toggle="table"
-           data-url="{% url 'table_postgraduate_list' %}"
-           data-pagination="true"
-           data-side-pagination="server"
-           data-page-list="[10, 20, 50, 100, 200]"
-           data-page-size=20
-           data-search="true" data-mobile-responsive="true"
-           data-show-refresh="true" data-show-columns="true"
-           data-unique-id="postgraduate_id"
-    >
-        <thead>
-        <tr>
-            <th data-field="postgraduate_phone" data-sortable="true">手机号</th>
-            <th data-field="postgraduate_name" data-sortable="true">姓名</th>
-            <th data-field="postgraduate_teacher">导师</th>
-            <th data-field="postgraduate_school" data-sortable="true">学校</th>
-            <th data-field="postgraduate_classes" data-sortable="true">班级</th>
-            <th data-field="postgraduate_device" data-sortable="true">设备</th>
-        </tr>
-        </thead>
-    </table>
+    <table id="table"></table>
+{% endblock %}
+
+{% block extrascript %}
+    <script src="{% static 'bootstrap-table/js/bootstrap-table.min.js' %}"></script>
+    <script src="{% static 'bootstrap-table/js/locales/bootstrap-table-zh-CN.min.js' %}"></script>
+    <script>
+        function operateFormatter(value, row, index) {
+            return [
+                '<a class="btn btn-primary btn-sm" type="button" style="margin-right:5px;" href={% url 'edit_postgraduate' %}?phone=' + row.postgraduate_phone + '>编辑</a>',
+                '<button class="RoleOfDelete btn btn-danger btn-sm" type="button">删除</button>'
+            ].join('');
+        }
+
+        window.operateEvents = {
+            'click .RoleOfDelete': function (e, value, row, index) {
+                $.get(
+                    "{% url 'delete_postgraduate' %}",
+                    {'phone': row.postgraduate_phone},
+                    function (response) {
+                        if (response.result)
+                            {#$('#table').bootstrapTable('refresh');#}
+                            window.location.reload();
+                    }
+                )
+            }
+        };
+        $('#table').bootstrapTable({
+            url: "{% url 'postgraduate_list' %}?table=true",
+            pagination: true,
+            sidePagination: "server",
+            pageList: [10, 20, 50, 100, 200],
+            pageSize: 20,
+            search: true,
+            showRefresh: true,
+            showColumns: true,
+            uniqueId: 'postgraduate_phone',
+            columns: [{
+                field: 'postgraduate_phone',
+                title: '手机号',
+                sortable: true
+            }, {
+                field: 'postgraduate_name',
+                title: '姓名',
+                sortable: true
+            }, {
+                field: 'postgraduate_teacher',
+                title: '导师',
+                sortable: true
+            }, {
+                field: 'postgraduate_school',
+                title: '学校',
+                sortable: true
+            }, {
+                field: 'postgraduate_device',
+                title: '设备',
+                sortable: true
+            }, {
+                field: 'operate',
+                title: '操作',
+                events: operateEvents,
+                formatter: operateFormatter
+            }]
+        });
+    </script>
 {% endblock %}

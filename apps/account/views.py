@@ -171,51 +171,49 @@ def remove(request):
 
 @login_required
 def postgraduate_list(request):
-    teacher = get_login_user(request)
-    return render(request, 'account/postgraduate_list.html', {'teacher': teacher})
-
-
-@login_required
-def table_postgraduate_list(request):
     if request.method == 'GET':
-        limit = int(request.GET.get('limit'))
-        offset = int(request.GET.get('offset'))
-        search = request.GET.get('search')
-        sort_column = request.GET.get('sort')
-        order = request.GET.get('order')
-        teacher = get_login_user(request)
-        if search:
-            postgraduates = teacher.postgraduate_set.filter(Q(phone=search) | Q(name=search))  # 或查询需要试用django Q
-        else:
-            postgraduates = teacher.postgraduate_set.all()
+        response = dict()
+        response['teacher'] = get_login_user(request)
+        if request.GET.get('table'):
+            limit = int(request.GET.get('limit'))
+            offset = int(request.GET.get('offset'))
+            search = request.GET.get('search')
+            sort_column = request.GET.get('sort')
+            order = request.GET.get('order')
+            teacher = get_login_user(request)
+            if search:
+                postgraduates = teacher.postgraduate_set.filter(Q(phone=search) | Q(name=search))  # 或查询需要试用django Q
+            else:
+                postgraduates = teacher.postgraduate_set.all()
 
-        if sort_column:
-            sort_column = sort_column.replace('postgraduate_', '')
-            if sort_column in ['phone', 'name', 'teacher', 'school', 'classes']:
-                if order == 'desc':
-                    sort_column = '-{}'.format(sort_column)
-                postgraduates = postgraduates.order_by(sort_column)
+            if sort_column:
+                sort_column = sort_column.replace('postgraduate_', '')
+                if sort_column in ['phone', 'name', 'teacher', 'school', 'classes']:
+                    if order == 'desc':
+                        sort_column = '-{}'.format(sort_column)
+                    postgraduates = postgraduates.order_by(sort_column)
 
-        response = {'total': postgraduates.count(), 'rows': []}
-        for postgraduate in postgraduates:
-            device = '未绑定'
-            if Device.objects.filter(postgraduate=postgraduate).exists():
-                if Device.objects.get(postgraduate=postgraduate).imei:
-                    device = '已绑定'
-            response['rows'].append({
-                "postgraduate_phone": postgraduate.phone,
-                "postgraduate_name": postgraduate.name,
-                "postgraduate_teacher": postgraduate.teacher.name,
-                "postgraduate_school": postgraduate.school,
-                "postgraduate_classes": postgraduate.classes,
-                "postgraduate_device": device
-            })
-        if not offset:
-            offset = 0
-        if not limit:
-            limit = 20
-        response['rows'] = response['rows'][offset:offset + limit]
-        return JsonResponse(response)
+            response = {'total': postgraduates.count(), 'rows': []}
+            for postgraduate in postgraduates:
+                device = '未绑定'
+                if Device.objects.filter(postgraduate=postgraduate).exists():
+                    if Device.objects.get(postgraduate=postgraduate).imei:
+                        device = '已绑定'
+                response['rows'].append({
+                    "postgraduate_phone": postgraduate.phone,
+                    "postgraduate_name": postgraduate.name,
+                    "postgraduate_teacher": postgraduate.teacher.name,
+                    "postgraduate_school": postgraduate.school,
+                    "postgraduate_classes": postgraduate.classes,
+                    "postgraduate_device": device
+                })
+            if not offset:
+                offset = 0
+            if not limit:
+                limit = 20
+            response['rows'] = response['rows'][offset:offset + limit]
+            return JsonResponse(response)
+        return render(request, 'account/postgraduate_list.html', response)
 
 
 @login_required
@@ -235,6 +233,39 @@ def add_postgraduate(request):
         form = PostgraduateForm()
     response['form'] = form
     return render(request, 'account/add_postgraduate.html', response)
+
+
+@login_required
+def edit_postgraduate(request):
+    response = dict()
+    response['teacher'] = teacher = get_login_user(request)
+    phone = request.GET.get('phone')
+    postgraduate = Postgraduate.objects.get(phone=phone)
+    if request.method == 'POST':
+        form = PostgraduateForm(request.POST, instance=postgraduate)
+        if form.is_valid():
+            form.save()
+            messages.add_message(request, messages.INFO, '修改成功')
+            return redirect('postgraduate_list')
+    else:
+        form = PostgraduateForm(instance=postgraduate)
+    response['form'] = form
+    return render(request, 'account/edit_postgraduate.html', response)
+
+
+@login_required
+def delete_postgraduate(request):
+    if request.method == 'GET':
+        response = dict()
+        phone = request.GET.get('phone')
+        postgraduate = Postgraduate.objects.get(phone=phone)
+        if postgraduate:
+            postgraduate.delete()
+            response['result'] = True
+            messages.add_message(request, messages.INFO, '成功删除')
+        else:
+            response['result'] = False
+        return JsonResponse(response)
 
 
 @login_required
