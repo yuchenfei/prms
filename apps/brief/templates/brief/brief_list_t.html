@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
+    <h2>查看小结</h2>
     {% for brief in brief_list %}
         <div class="panel panel-default">
             <div class="panel-heading clearfix">
@@ -19,7 +20,7 @@
                     <span class="label label-warning" role="alert">未查看</span>
                 {% endif %}
                 <div class="pull-right">
-                    <button class="btn btn-default" onclick="window.open('{% url 'brief_review_t' brief.id %}')">查看
+                    <button class="btn btn-default" onclick="window.open('{% url 'brief_review_t' brief.id %}')">批复
                     </button>
                 </div>
             </div>

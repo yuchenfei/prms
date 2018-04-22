@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
+    <h2>我的小结</h2>
     {% for brief in brief_list %}
         <div class="panel panel-default">
             <div class="panel-heading clearfix">
@@ -21,8 +22,7 @@
                     <span class="label label-success" role="alert">已批阅</span>
                     <div class="pull-right">
                         <button class="btn btn-default"
-                                onclick="window.location.href='{% url 'brief_review_p' brief.id %}'">
-                            查看
+                                onclick="window.location.href='{% url 'brief_review_p' brief.id %}'">查看
                         </button>
                     </div>
                 {% else %}
