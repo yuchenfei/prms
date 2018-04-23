@@ -25,7 +25,13 @@ from group_file import url as group_file_urls
 from brief import url as brief_urls
 from api import urls as api_urls
 
+
+def i18n_javascript(request):
+    return admin.site.i18n_javascript(request)
+
+
 urlpatterns = [
+    url(r'^admin/jsi18n', i18n_javascript),  # 普通表单也可使用admin控件
     url(r'^admin/', admin.site.urls),  # 管理后台
     url(r'^', include(account_urls)),
     url(r'^', include(checkin_urls)),
