@@ -2,6 +2,7 @@ import time
 from datetime import datetime
 
 import qrcode
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
@@ -29,15 +30,28 @@ def check_in(request):
 
 
 def temp_list(request):
-    response_data = dict()
-    teacher = get_login_user(request)
-    response_data['teacher'] = teacher
-    if teacher.group:
-        response_data['items'] = TempCheckInSetting.objects.filter(
-            Q(teacher=teacher) | Q(teacher__group=teacher.group, is_group=True)).all()
-    else:
-        response_data['items'] = TempCheckInSetting.objects.filter(teacher=teacher).all()
-    return render(request, 'checkin/temp_list.html', response_data)
+    if request.method == 'GET':
+        response_data = dict()
+        response_data['teacher'] = teacher = get_login_user(request)
+        page = request.GET.get('page', '1')
+        if teacher.group:
+            items = TempCheckInSetting.objects.filter(
+                Q(teacher=teacher) | Q(teacher__group=teacher.group, is_group=True)).order_by('-date', '-time').all()
+        else:
+            items = TempCheckInSetting.objects.filter(teacher=teacher).order_by('-date', '-time').all()
+        paginator = Paginator(items, 5)
+        try:
+            items_p = paginator.page(int(page))
+        except PageNotAnInteger:
+            items_p = paginator.page(1)
+            page = 1
+        except EmptyPage:
+            items_p = paginator.page(paginator.num_pages)
+            page = paginator.num_pages
+        response_data['items'] = items_p
+        response_data['range'] = paginator.page_range
+        response_data['page'] = int(page)
+        return render(request, 'checkin/temp_list.html', response_data)
 
 
 def temp_setting(request):
@@ -139,18 +153,32 @@ def show_check_in(request):
 
 
 def my_items(request):
-    response_data = dict()
-    response_data['postgraduate'] = postgraduate = get_login_user(request)
-    response_data['daily_setting'] = None
-    if DailyCheckInSetting.objects.filter(teacher=postgraduate.teacher).exists():
-        response_data['daily_setting'] = setting = DailyCheckInSetting.objects.get(teacher=postgraduate.teacher)
-        week_str = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日']
-        response_data['week_option'] = []
-        for index, option in enumerate(list(setting.week_option)):
-            if option == '1':
-                response_data['week_option'].append(week_str[index])
-    response_data['temp_setting'] = TempCheckInSetting.objects.filter(teacher=postgraduate.teacher).all()
-    return render(request, 'checkin/my_items.html', response_data)
+    if request.method == 'GET':
+        response_data = dict()
+        response_data['postgraduate'] = postgraduate = get_login_user(request)
+        page = request.GET.get('page', '1')
+        response_data['daily_setting'] = None
+        if DailyCheckInSetting.objects.filter(teacher=postgraduate.teacher).exists():
+            response_data['daily_setting'] = setting = DailyCheckInSetting.objects.get(teacher=postgraduate.teacher)
+            week_str = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日']
+            response_data['week_option'] = []
+            for index, option in enumerate(list(setting.week_option)):
+                if option == '1':
+                    response_data['week_option'].append(week_str[index])
+        items = TempCheckInSetting.objects.filter(teacher=postgraduate.teacher).order_by('-date', '-time').all()
+        paginator = Paginator(items, 5)
+        try:
+            items_p = paginator.page(int(page))
+        except PageNotAnInteger:
+            items_p = paginator.page(1)
+            page = 1
+        except EmptyPage:
+            items_p = paginator.page(paginator.num_pages)
+            page = paginator.num_pages
+        response_data['items'] = items_p
+        response_data['range'] = paginator.page_range
+        response_data['page'] = int(page)
+        return render(request, 'checkin/my_items.html', response_data)
 
 
 def to_js_date(d, t):

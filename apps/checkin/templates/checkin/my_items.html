@@ -42,34 +42,76 @@
             {% endif %}
         </div>
     </div>
-    {% for setting in temp_setting %}
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <b>临时签到 - {{ setting.name }}</b>
-                {% if setting.is_group %}
-                    <div class="pull-right">
-                        <span class="label label-info">组签到</span>
-                    </div>
-                {% endif %}
+    {% if items %}
+        {% for item in items %}
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <b>临时签到 - {{ item.name }}</b>
+                    {% if item.is_group %}
+                        <div class="pull-right">
+                            <span class="label label-info">组签到</span>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="panel-body">
+                    <h4>教师：</h4>
+                    <span class="label label-info">{{ item.teacher.name }}</span>
+                    <h4>时间：</h4>
+                    <span class="label label-info">{{ item.date }} {{ item.time }}</span>
+                    <h4>签到区间：</h4>
+                    <span class="label label-info">{{ item.start_time }}</span> - <span
+                        class="label label-info">{{ item.end_time }}</span>
+                    <h4>签到条件：</h4>
+                    {% if item.computer %}
+                        指定计算机：{{ item.computer.name }}
+                    {% else %}
+                        <span class="label label-default">未指定</span>
+                    {% endif %}
+                </div>
             </div>
-            <div class="panel-body">
-                <h4>教师：</h4>
-                <span class="label label-info">{{ setting.teacher.name }}</span>
-                <h4>时间：</h4>
-                <span class="label label-info">{{ setting.date }} {{ setting.time }}</span>
-                <h4>签到区间：</h4>
-                <span class="label label-info">{{ setting.start_time }}</span> - <span
-                    class="label label-info">{{ setting.end_time }}</span>
-                <h4>签到条件：</h4>
-                {% if setting.computer %}
-                    指定计算机：{{ setting.computer.name }}
-                {% else %}
-                    <span class="label label-default">未指定</span>
-                {% endif %}
-            </div>
+        {% endfor %}
+        <div class="pull-right">
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    {% if items.has_previous %}
+                        <li>
+                            <a href="{% url 'check_in_my_items' %}?page={{ items.previous_page_number }}"
+                               aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="disabled">
+                        <span>
+                            <span aria-hidden="true">&laquo;</span>
+                        </span>
+                        </li>
+                    {% endif %}
+                    {% for i in range %}
+                        {% if page == i %}
+                            <li class="active"><a href="{% url 'check_in_my_items' %}?page={{ i }}">{{ i }}</a></li>
+                        {% else %}
+                            <li><a href="{% url 'check_in_my_items' %}?page={{ i }}">{{ i }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    {% if items.has_next %}
+                        <li>
+                            <a href="{% url 'check_in_my_items' %}?page={{ items.next_page_number }}" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="disabled">
+                        <span>
+                            <span aria-hidden="true">&raquo;</span>
+                        </span>
+                        </li>
+                    {% endif %}
+
+                </ul>
+            </nav>
         </div>
-    {% endfor %}
-    {% if not temp_setting %}
+    {% else %}
         <div class="panel panel-default">
             <div class="panel-heading"><b>临时签到</b></div>
             <div class="panel-body">

@@ -23,7 +23,7 @@ class TempCheckInSetting(models.Model):
     start_time = models.TimeField()
     end_time = models.TimeField()
     is_group = models.BooleanField(default=False)
-    computer = models.ManyToManyField(Computer)
+    computer = models.ManyToManyField(Computer, blank=True)
 
 
 class TempCheckIn(models.Model):
@@ -51,7 +51,7 @@ class DailyCheckInSetting(models.Model):
     time3_end = models.TimeField(blank=True, null=True)
     time4_start = models.TimeField(blank=True, null=True)
     time4_end = models.TimeField(blank=True, null=True)
-    computer = models.ManyToManyField(Computer)
+    computer = models.ManyToManyField(Computer, blank=True)
 
 
 class DailyCheckIn(models.Model):
