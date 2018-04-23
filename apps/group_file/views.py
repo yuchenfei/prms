@@ -33,7 +33,7 @@ def group_file_list(request):
             else:
                 group_files = GroupFile.objects.filter(group=user.teacher.group, show=True)
             if search:
-                group_files = group_files.filter(Q(title=search) | Q(owner__name=search))
+                group_files = group_files.filter(Q(title__icontains=search) | Q(owner__name__icontains=search))
             if sort_column:
                 sort_column = sort_column.replace('group_file_', '')
                 if sort_column in ['title', 'owner', 'date', 'show']:
