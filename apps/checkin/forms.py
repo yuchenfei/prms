@@ -1,4 +1,4 @@
-from django.forms import ModelForm, TextInput, ValidationError, HiddenInput, DateInput
+from django.forms import ModelForm, TextInput, ValidationError, HiddenInput, DateInput, CheckboxSelectMultiple
 
 from .models import Computer, TempCheckInSetting, DailyCheckInSetting
 
@@ -36,7 +36,8 @@ class TempCheckInSettingForm(ModelForm):
             'computer': '指定计算机',
         }
         widgets = {
-            'date': DateInput(format='%Y-%m-%d')
+            'date': DateInput(format='%Y-%m-%d'),
+            'computer': CheckboxSelectMultiple()
         }
 
 
@@ -51,4 +52,7 @@ class DailyCheckInSettingForm(ModelForm):
             'time1_start': '开始时间',
             'time1_end': '结束时间',
             'computer': '指定计算机'
+        }
+        widgets = {
+            'computer': CheckboxSelectMultiple(),
         }

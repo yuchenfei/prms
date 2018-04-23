@@ -21,8 +21,11 @@
                 <span class="label label-info">{{ item.start_time }}</span> - <span
                     class="label label-info">{{ item.end_time }}</span>
                 <h4>签到条件：</h4>
-                {% if item.computer %}
-                    指定计算机：{{ item.computer.name }}
+                {% if item.computer.all %}
+                    指定计算机：
+                    {% for computer in item.computer.all %}
+                        <span class="label label-info">{{ computer.name }}</span>
+                    {% endfor %}
                 {% else %}
                     <span class="label label-default">未指定</span>
                 {% endif %}

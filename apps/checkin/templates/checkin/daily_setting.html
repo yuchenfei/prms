@@ -42,13 +42,13 @@
         </div>
         <h3>星期选择</h3>
         <ul class="dowebok week_ul">
-            <li class="week_li"><input id="xq1" name="checkbox" data-labelauty="星期一" type="checkbox"></li>
-            <li class="week_li"><input id="xq2" name="checkbox" data-labelauty="星期二" type="checkbox"></li>
-            <li class="week_li"><input id="xq3" name="checkbox" data-labelauty="星期三" type="checkbox"></li>
-            <li class="week_li"><input id="xq4" name="checkbox" data-labelauty="星期四" type="checkbox"></li>
-            <li class="week_li"><input id="xq5" name="checkbox" data-labelauty="星期五" type="checkbox"></li>
-            <li class="week_li"><input id="xq6" name="checkbox" data-labelauty="星期六" type="checkbox"></li>
-            <li class="week_li"><input id="xq7" name="checkbox" data-labelauty="星期日" type="checkbox"></li>
+            <li class="week_li"><input class="cb" id="xq1" name="checkbox" data-labelauty="星期一" type="checkbox"></li>
+            <li class="week_li"><input class="cb" id="xq2" name="checkbox" data-labelauty="星期二" type="checkbox"></li>
+            <li class="week_li"><input class="cb" id="xq3" name="checkbox" data-labelauty="星期三" type="checkbox"></li>
+            <li class="week_li"><input class="cb" id="xq4" name="checkbox" data-labelauty="星期四" type="checkbox"></li>
+            <li class="week_li"><input class="cb" id="xq5" name="checkbox" data-labelauty="星期五" type="checkbox"></li>
+            <li class="week_li"><input class="cb" id="xq6" name="checkbox" data-labelauty="星期六" type="checkbox"></li>
+            <li class="week_li"><input class="cb" id="xq7" name="checkbox" data-labelauty="星期日" type="checkbox"></li>
         </ul>
         {{ form.week_option|attr:"hidden" }}
         <h3>签到时间区间</h3>
@@ -149,7 +149,7 @@
         <h3>签到条件</h3>
         <div class="form-group">
             {{ form.computer.label_tag }}
-            {{ form.computer|add_class:"form-control" }}
+            {{ form.computer }}
         </div>
         <div class="pull-right">
             <input class="btn btn-primary" type="submit" value="保存">
@@ -185,7 +185,7 @@
         $('.clockpicker').clockpicker({
             autoclose: true
         });
-        $(':input').labelauty();
+        $('.cb').labelauty();
         // 初始化星期选择
         var week_option = $('#{{ form.week_option.id_for_label }}');
         if (!week_option.val()) {

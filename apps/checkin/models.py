@@ -4,8 +4,12 @@ from account.models import Postgraduate, Teacher
 
 
 class Computer(models.Model):
-    name = models.CharField(max_length=30, unique=True)
-    cpu_id = models.CharField(max_length=20, unique=True)
+    teacher = models.ForeignKey(Teacher)
+    name = models.CharField(max_length=30)
+    cpu_id = models.CharField(max_length=20)
+
+    class Meta:
+        unique_together = ('teacher', 'name')
 
     def __str__(self):
         return self.name
@@ -19,7 +23,7 @@ class TempCheckInSetting(models.Model):
     start_time = models.TimeField()
     end_time = models.TimeField()
     is_group = models.BooleanField(default=False)
-    computer = models.ForeignKey(Computer, blank=True, null=True)
+    computer = models.ManyToManyField(Computer)
 
 
 class TempCheckIn(models.Model):
@@ -34,7 +38,7 @@ class DailyCheckInSetting(models.Model):
         (2, '一个时间段'),
         (4, '两个时间段')
     )
-    teacher = models.ForeignKey(Teacher, unique=True)
+    teacher = models.OneToOneField(Teacher)
     start_date = models.DateField()
     end_date = models.DateField()
     week_option = models.CharField(max_length=7)
@@ -47,7 +51,7 @@ class DailyCheckInSetting(models.Model):
     time3_end = models.TimeField(blank=True, null=True)
     time4_start = models.TimeField(blank=True, null=True)
     time4_end = models.TimeField(blank=True, null=True)
-    computer = models.ForeignKey(Computer, blank=True, null=True)
+    computer = models.ManyToManyField(Computer)
 
 
 class DailyCheckIn(models.Model):

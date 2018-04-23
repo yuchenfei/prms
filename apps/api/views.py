@@ -116,7 +116,6 @@ def items(request):
             records_ok = TempCheckIn.objects.filter(target__in=temp_setting, postgraduate=postgraduate).all()
             for record in records_ok:
                 json['temp_ok'].append(record.target.id)
-        print(json)
         return JsonResponse(json)
 
 
@@ -150,7 +149,7 @@ def check_in(request):
                         setting = DailyCheckInSetting.objects.get(teacher=postgraduate.teacher)
                         # 检查设置的条件是否满足
                         if setting.computer:
-                            if setting.computer != check_in_code.get_computer():
+                            if not check_in_code.get_computer() in setting.computer.all():
                                 # 签到设置中限定计算机，且计算机不符
                                 return JsonResponse(json)
                         # 检查时间是否符合设置区间
@@ -173,7 +172,7 @@ def check_in(request):
                         setting = TempCheckInSetting.objects.get(id=index)
                         # 检查设置的条件是否满足
                         if setting.computer:
-                            if setting.computer != check_in_code.get_computer():
+                            if not check_in_code.get_computer() in setting.computer.all():
                                 # 签到设置中限定计算机，且计算机不符
                                 return JsonResponse(json)
                         # 检查日期

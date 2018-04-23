@@ -50,6 +50,7 @@ def temp_setting(request):
             setting = form.save(commit=False)
             setting.teacher = teacher
             setting.save()
+            form.save_m2m()
             return redirect('check_in_temp_list')
         else:
             print(form.errors)
@@ -72,6 +73,7 @@ def daily_setting(request):
             setting = form.save(commit=False)
             setting.teacher = teacher
             setting.save()
+            form.save_m2m()
     else:
         form = DailyCheckInSettingForm(instance=instance)
     response_data['form'] = form
@@ -80,20 +82,21 @@ def daily_setting(request):
 
 def computer_list(request):
     response_data = dict()
-    teacher = get_login_user(request)
-    response_data['teacher'] = teacher
-    response_data['computer_list'] = Computer.objects.all()
+    response_data['teacher'] = teacher = get_login_user(request)
+    response_data['computer_list'] = Computer.objects.filter(teacher=teacher).all()
     return render(request, 'checkin/computer_list.html', response_data)
 
 
 def computer_add(request):
-    teacher = get_login_user(request)
-    response_data = {'teacher': teacher}
+    response_data = dict()
+    response_data['teacher'] = teacher = get_login_user(request)
     if request.method == 'POST':
         form = ComputerForm(request.POST)
         if form.is_valid():
-            form.save()
-            redirect('computer_list')
+            computer = form.save(commit=False)
+            computer.teacher = teacher
+            computer.save()
+            return redirect('computer_list')
     else:
         form = ComputerForm()
     response_data['form'] = form
