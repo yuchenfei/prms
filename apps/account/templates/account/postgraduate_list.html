@@ -41,6 +41,8 @@
                 )
             }
         };
+
+
         $('#table').bootstrapTable({
             url: "{% url 'postgraduate_list' %}?table=true",
             pagination: true,
@@ -78,5 +80,6 @@
                 formatter: operateFormatter
             }]
         });
+        $("input[placeholder='搜索']").attr('placeholder','搜索（手机号、姓名）') // 修改搜索提示
     </script>
 {% endblock %}

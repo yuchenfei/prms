@@ -182,7 +182,7 @@ def postgraduate_list(request):
             order = request.GET.get('order')
             teacher = get_login_user(request)
             if search:
-                postgraduates = teacher.postgraduate_set.filter(Q(phone=search) | Q(name=search))  # 或查询需要试用django Q
+                postgraduates = teacher.postgraduate_set.filter(Q(phone__icontains=search) | Q(name__icontains=search))
             else:
                 postgraduates = teacher.postgraduate_set.all()
 
