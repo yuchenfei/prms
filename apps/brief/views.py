@@ -90,6 +90,7 @@ def review(request, brief_id):
             form = InstructionsForm(request.POST, instance=brief)
             if form.is_valid():
                 form.save()
+                return redirect('brief_list_t')
         else:
             form = InstructionsForm(instance=brief)
         response_data['form'] = form

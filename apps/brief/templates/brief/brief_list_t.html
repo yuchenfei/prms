@@ -11,17 +11,22 @@
                 </div>
             </div>
             <div class="panel-body">
-                {{ brief.content|truncatechars:"100" }}
+                <div class="summary">
+                    {{ brief.content|truncatechars:"100" }}
+                </div>
+                <div class="details">
+                </div>
             </div>
             <div class="panel-footer clearfix">
-                {% if brief.have_read %}
-                    <span class="label label-success" role="alert">已阅</span>
-                {% else %}
-                    <span class="label label-warning" role="alert">未查看</span>
-                {% endif %}
+                <div class="pull-left status">
+                    {% if brief.have_read %}
+                        <span class="label label-success" role="alert">已阅</span>
+                    {% else %}
+                        <span class="label label-warning" role="alert">未查看</span>
+                    {% endif %}
+                </div>
                 <div class="pull-right">
-                    <button class="btn btn-default" onclick="window.open('{% url 'brief_review_t' brief.id %}')">批复
-                    </button>
+                    <button class="btn btn-default view" value="{% url 'brief_review_t' brief.id %}">查看</button>
                 </div>
             </div>
         </div>
@@ -29,4 +34,34 @@
     {% if not brief_list %}
         <p>目前未提交任何小结</p>
     {% endif %}
+{% endblock %}
+
+{% block extrascript %}
+    <script>
+        $(".view").click(function () {
+            var btn = $(this);
+            var url = btn.attr("value");
+            var panel = btn.closest(".panel");
+            var summary = panel.find(".summary");
+            var details = panel.find(".details");
+            var status = panel.find(".status");
+            if (btn.html() === '查看') {
+                $.get(
+                    url,
+                    function (response) {
+                        summary.hide();
+                        details.html(response);
+                        details.show();
+                        status.html('<span class="label label-success" role="alert">已阅</span>');
+                        btn.html('收起');
+                    }
+                )
+            } else {
+                details.hide();
+                summary.show();
+                btn.html('查看');
+            }
+
+        })
+    </script>
 {% endblock %}

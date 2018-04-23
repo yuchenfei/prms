@@ -1,25 +1,17 @@
-{% extends 'base.html' %}
-
-{% block content %}
-    <div class="jumbotron">
-        <h2>{{ brief.submitter.name }} 小结</h2>
-        <h6>最后修改日期：{{ brief.date }}</h6>
-        <p>{{ brief.content|linebreaksbr }}</p>
-        {% if brief.file %}
-            附件：<a href="{{ brief.file.url }}">{{ brief.file.name }}</a>
-        {% endif %}
-        <br>
-        <h2>批注</h2>
-        {% if form %}
-            <form class="form" method="post">
-                {% csrf_token %}
-                <div class="form-group">{{ form.instructions }}</div>
-                <div class="pull-right">
-                    <input class="btn btn-primary" type="submit" value="提交">
-                </div>
-            </form>
-        {% else %}
-            <p>{{ brief.instructions|default_if_none:"无" }}</p>
-        {% endif %}
-    </div>
-{% endblock %}
+<p>{{ brief.content|linebreaksbr }}</p>
+{% if brief.file %}
+    附件：<a href="{{ brief.file.url }}">{{ brief.file.name }}</a>
+{% endif %}
+<br>
+<h3>批注</h3>
+{% if form %}
+    <form class="form" action="{% url 'brief_review_t' brief.id %}" method="post">
+        {% csrf_token %}
+        <div class="form-group">{{ form.instructions }}</div>
+        <div class="pull-right">
+            <input class="btn btn-primary" type="submit" value="提交">
+        </div>
+    </form>
+{% else %}
+    <p>{{ brief.instructions|default_if_none:"无" }}</p>
+{% endif %}

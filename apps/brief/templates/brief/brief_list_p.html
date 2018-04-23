@@ -13,7 +13,11 @@
                 </div>
             </div>
             <div class="panel-body">
-                {{ brief.content|truncatechars:"100" }}
+                <div class="summary">
+                    {{ brief.content|truncatechars:"100" }}
+                </div>
+                <div class="details">
+                </div>
             </div>
             <div class="panel-footer clearfix">
                 {% if not brief.commit %}
@@ -21,9 +25,7 @@
                 {% elif brief.have_read %}
                     <span class="label label-success" role="alert">已批阅</span>
                     <div class="pull-right">
-                        <button class="btn btn-default"
-                                onclick="window.location.href='{% url 'brief_review_p' brief.id %}'">查看
-                        </button>
+                        <button class="btn btn-default view" value="{% url 'brief_review_p' brief.id %}">查看</button>
                     </div>
                 {% else %}
                     <span class="label label-info" role="alert">未查看</span>
@@ -31,4 +33,32 @@
             </div>
         </div>
     {% endfor %}
+{% endblock %}
+
+{% block extrascript %}
+    <script>
+        $(".view").click(function () {
+            var btn = $(this);
+            var url = btn.attr("value");
+            var panel = btn.closest(".panel");
+            var summary = panel.find(".summary");
+            var details = panel.find(".details");
+            if (btn.html() === '查看') {
+                $.get(
+                    url,
+                    function (response) {
+                        summary.hide();
+                        details.html(response);
+                        details.show();
+                        btn.html('收起');
+                    }
+                )
+            } else {
+                details.hide();
+                summary.show();
+                btn.html('查看');
+            }
+
+        })
+    </script>
 {% endblock %}

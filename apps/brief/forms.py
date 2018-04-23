@@ -24,5 +24,5 @@ class InstructionsForm(ModelForm):
             'instructions': '批注'
         }
         widgets = {
-            'instructions': Textarea(attrs={'class': 'form-control'})
+            'instructions': Textarea(attrs={'class': 'form-control', 'rows': '5'})
         }
