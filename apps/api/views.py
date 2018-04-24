@@ -148,7 +148,7 @@ def check_in(request):
                         # 日常签到
                         setting = DailyCheckInSetting.objects.get(teacher=postgraduate.teacher)
                         # 检查设置的条件是否满足
-                        if setting.computer:
+                        if setting.computer.exists():
                             if not check_in_code.get_computer() in setting.computer.all():
                                 # 签到设置中限定计算机，且计算机不符
                                 return JsonResponse(json)
@@ -171,7 +171,7 @@ def check_in(request):
                     if type_ == 2:
                         setting = TempCheckInSetting.objects.get(id=index)
                         # 检查设置的条件是否满足
-                        if setting.computer:
+                        if setting.computer.exists():
                             if not check_in_code.get_computer() in setting.computer.all():
                                 # 签到设置中限定计算机，且计算机不符
                                 return JsonResponse(json)
