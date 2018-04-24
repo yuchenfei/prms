@@ -4,7 +4,7 @@ from account.models import Postgraduate
 
 
 def brief_directory_path(instance, filename):
-    return 'uploads/brief/{0}/{1}'.format(instance.submitter.id, filename)
+    return 'uploads/brief/{0}/{1}'.format(instance.submitter.uuid, filename)
 
 
 class Brief(models.Model):
