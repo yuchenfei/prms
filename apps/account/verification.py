@@ -2,6 +2,8 @@ import hashlib
 
 import jwt
 
+from django.core.exceptions import ObjectDoesNotExist
+
 from account.models import Teacher, Postgraduate
 
 
@@ -34,4 +36,7 @@ def verify_postgraduate_by_jwt(token):
         return None
     except jwt.ExpiredSignatureError:
         # token无效会捕获此异常
+        return None
+    except ObjectDoesNotExist:
+        # 对象不存在
         return None
