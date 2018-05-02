@@ -1,7 +1,9 @@
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
+from operator import itemgetter
 
 import qrcode
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
@@ -9,7 +11,9 @@ from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from io import BytesIO
 
+from account.models import Postgraduate
 from account.views import get_login_user
+from leave.models import Leave
 from .check_in_code import CheckInCode
 from .models import DailyCheckIn, Computer, TempCheckInSetting, DailyCheckInSetting
 from .forms import ComputerForm, TempCheckInSettingForm, DailyCheckInSettingForm
@@ -119,8 +123,7 @@ def computer_add(request):
 
 def show_check_in(request):
     response_data = dict()
-    teacher = get_login_user(request)
-    response_data['teacher'] = teacher
+    response_data['teacher'] = teacher = get_login_user(request)
     if request.method == 'GET':
         date = request.GET.get('date')
         if date is not None:
@@ -152,6 +155,90 @@ def show_check_in(request):
             return render(request, 'checkin/show_check_in.html', response_data)
 
 
+def check_in_status(request):
+    if request.method == 'GET':
+        response = dict()
+        response['teacher'] = teacher = get_login_user(request)
+
+        date_range = request.GET.get('date_range')
+        if date_range:  # 获取图标数据
+            # 解析需要显示的时间范围
+            try:
+                date_range = date_range.split(' to ')
+                begin_date = datetime.strptime(date_range[0], '%Y-%m-%d')
+                end_date = datetime.strptime(date_range[1], '%Y-%m-%d')
+            except Exception as e:
+                print(e)
+                begin_date = end_date = datetime.today()
+            date_range = [begin_date, end_date]
+            print(date_range)
+            # 查询数据
+            setting = DailyCheckInSetting.objects.get(teacher=teacher)  # 日常签到设置
+            postgraduates = Postgraduate.objects.filter(teacher=teacher).all()  # 所有研究生
+            check_in_set = DailyCheckIn.objects.filter(date__range=date_range,
+                                                       postgraduate__teacher=teacher).all()  # 签到记录
+            leave_set = Leave.objects.filter(date__range=date_range,
+                                             postgraduate__teacher=teacher,
+                                             state=True).all()  # 请假记录
+            # 计算应签到的次数
+            days = 0
+            d = begin_date
+            delta = timedelta(days=1)
+            while d < end_date:
+                if str(d.weekday()) in setting.week_option:
+                    days += 1
+                d += delta
+            today_times = 0
+            if str(end_date.weekday()) in setting.week_option:  # 单独判断最后一天的情况
+                today = datetime.today()
+                if end_date.date() == today.date():
+                    # 今日需判断签到时间是否已过
+                    for i in range(setting.times):
+                        if getattr(setting, 'time{}_end'.format(i + 1)) < today.time():
+                            today_times += 1
+                else:
+                    days += 1
+            total = setting.times * days + today_times
+            # 处理签到记录
+            check_in_times = dict()
+            for record in check_in_set:
+                name = record.postgraduate.name
+                times = 0
+                for i in range(4):
+                    if getattr(record, 'check{}'.format(i + 1)):
+                        times += 1
+                check_in_times[name] = min(times, setting.times) + check_in_times.setdefault(name, 0)
+            # 处理请假记录
+            leave_times = dict()
+            for record in leave_set:
+                name = record.postgraduate.name
+                leave_times[name] = setting.times + leave_times.setdefault(name, 0)
+            # 数据汇总
+            data = []
+            if total > 0:
+                for postgraduate in postgraduates:
+                    name = postgraduate.name
+                    cit = check_in_times.get(name, 0)
+                    lt = leave_times.get(name, 0)
+                    data.append({
+                        'name': name,
+                        'check_in': cit,
+                        'leave': lt,
+                        'absenteeism': total - cit - lt
+                    })
+                data = sorted(data, key=itemgetter('check_in'), reverse=True)  # 按照签到次数降序排序
+            return JsonResponse(dict(data=data))
+        else:
+            try:
+                response['setting'] = DailyCheckInSetting.objects.get(teacher=teacher)  # 日常签到设置
+            except ObjectDoesNotExist:
+                # 教师未设置日常签到
+                return redirect('check_in_daily_setting')
+            today = datetime.today()
+            response['start'] = today - timedelta(today.weekday()) if today.weekday() != 0 else today
+            return render(request, 'checkin/status.html', response)
+
+
 def my_items(request):
     if request.method == 'GET':
         response_data = dict()
@@ -162,9 +249,9 @@ def my_items(request):
             response_data['daily_setting'] = setting = DailyCheckInSetting.objects.get(teacher=postgraduate.teacher)
             week_str = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日']
             response_data['week_option'] = []
-            for index, option in enumerate(list(setting.week_option)):
-                if option == '1':
-                    response_data['week_option'].append(week_str[index])
+            for i in range(7):
+                if str(i) in list(setting.week_option):
+                    response_data['week_option'].append(week_str[i])
         items = TempCheckInSetting.objects.filter(teacher=postgraduate.teacher).order_by('-date', '-time').all()
         paginator = Paginator(items, 5)
         try:

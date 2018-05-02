@@ -74,13 +74,15 @@
                         {#                        </li>#}
                     </ul>
                 </li>
-                <li class="sub-menu {% nav_class 'show_check_in' %}">
+                <li class="sub-menu {% nav_class 'show_check_in' 'check_in_status' %}">
                     <a href="javascript:void(0);">签到报表<i class="glyphicon glyphicon-chevron-right pull-right"></i></a>
                     <ul>
                         <li class="{% nav_class 'show_check_in' %}">
                             <a href="{% url 'show_check_in' %}">今日情况</a>
                         </li>
-
+                        <li class="{% nav_class 'check_in_status' %}">
+                            <a href="{% url 'check_in_status' %}">签到统计</a>
+                        </li>
                     </ul>
                 </li>
                 <li class="sub-menu {% nav_class 'import_teacher' 'import_postgraduate_list' %}">

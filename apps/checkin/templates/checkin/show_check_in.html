@@ -2,16 +2,16 @@
 
 {% block extrahead %}
     {% load static %}
-    <!-- amCharts stylesheet -->
-    <link rel="stylesheet" href="https://www.amcharts.com/lib/3/plugins/export/export.css" type="text/css" media="all"/>
     <!-- DatetimePicker stylesheet -->
     <link rel="stylesheet" href="{% static 'bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css' %}">
+    <!-- amCharts stylesheet -->
+    <link rel="stylesheet" href="https://www.amcharts.com/lib/3/plugins/export/export.css" type="text/css" media="all"/>
     <!-- this page specific stylesheet -->
     <link rel="stylesheet" href="{% static 'css/chart.css' %}">
 {% endblock %}
 
 {% block content %}
-    <h2>今日情况</h2>
+    <h2>今日情况 </h2>
     <form class="form-inline">
         <div class="input-group date form_date" data-date="">
             <input class="form-control" id="date" type="text">
@@ -22,16 +22,10 @@
         <button class="btn" id="today" type="button">今天</button>
     </form>
     <div id="chartdiv"></div>
-
+    <div id="info" hidden>暂无数据</div>
 {% endblock %}
 
 {% block extrascript %}
-    <!-- amCharts script -->
-    <script src="https://www.amcharts.com/lib/3/amcharts.js"></script>
-    <script src="https://www.amcharts.com/lib/3/serial.js"></script>
-    <script src="https://www.amcharts.com/lib/3/gantt.js"></script>
-    <script src="https://www.amcharts.com/lib/3/themes/light.js"></script>
-    <script src="https://www.amcharts.com/lib/3/plugins/export/export.min.js"></script>
     <!-- moment script -->
     <script src="{% static 'js/moment-with-locales.js' %}"></script>
     <!-- DatetimePicker script -->
@@ -39,12 +33,41 @@
             src="{% static 'bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js' %}"></script>
     <script type="text/javascript"
             src="{% static 'bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.zh-CN.js' %}"></script>
+    <!-- amCharts script -->
+    <script src="https://www.amcharts.com/lib/3/amcharts.js"></script>
+    <script src="https://www.amcharts.com/lib/3/serial.js"></script>
+    <script src="https://www.amcharts.com/lib/3/gantt.js"></script>
+    <script src="https://www.amcharts.com/lib/3/themes/light.js"></script>
+    <script src="https://www.amcharts.com/lib/3/plugins/export/export.min.js"></script>
     <!-- this page specific script -->
     <script>
-        // amCharts 配置
-        var config = {
+        var dp = $('.form_date');
+        dp.datetimepicker({
+            language: 'zh-CN',
+            format: "yyyy-mm-dd",
+            weekStart: 1,
+            autoclose: true,
+            todayBtn: true,
+            todayHighlight: true,
+            startView: 2,
+            minView: 2
+        });
+        dp.datetimepicker("setDate", new Date());
+
+        $(".btn").on("click", function () {
+            if ($(this).attr("id") === "query") {
+                var date = $("#date").val();
+                console.log(date);
+            }
+        });
+
+        var chart = AmCharts.makeChart("chartdiv", {
             "type": "gantt",
             "theme": "light",
+            "listeners": [{
+                "event": "dataUpdated",
+                "method": checkEmptyData
+            }],
             "marginRight": 70,
             "period": "hh",
             "dataDateFormat": "YYYY-MM-DD",
@@ -99,7 +122,7 @@
             "export": {
                 "enabled": false
             }
-        };
+        });
 
         // 签到有效区域设置
         function guide(v, tv, name) {
@@ -116,21 +139,31 @@
             }
         }
 
-        function setChartData() {
+        function checkEmptyData() {
+            if (0 === chart.dataProvider.length) {
+                $('#chartdiv').hide();
+                $('#info').show();
+            } else {
+                $('#chartdiv').show();
+                $('#info').hide();
+            }
+        }
+
+        function getChartData() {
             $.getJSON("{% url 'show_check_in' %}?date=today", function (result) {
-                config.startDate = result.startDate;
+                chart.startDate = result.startDate;
                 var times = result.times;
                 // 根据设置确定边界
-                config.valueAxis.minimumDate = moment(result.time1_start).startOf('hour');
-                config.valueAxis.maximumDate = moment(result["time" + times + "_end"]).add(1, 'hours').startOf('hour');
+                chart.valueAxis.minimumDate = moment(result.time1_start).startOf('hour');
+                chart.valueAxis.maximumDate = moment(result["time" + times + "_end"]).add(1, 'hours').startOf('hour');
                 // 显示允许签到的时间段
-                config.guides.push(guide(result.time1_start, result.time1_end, "时段1-开始"));
+                chart.guides.push(guide(result.time1_start, result.time1_end, "时段1-开始"));
                 if (times > 1) {
-                    config.guides.push(guide(result.time2_start, result.time2_end, "时段1-结束"));
+                    chart.guides.push(guide(result.time2_start, result.time2_end, "时段1-结束"));
                 }
                 if (times > 2) {
-                    config.guides.push(guide(result.time3_start, result.time3_end, "时段2-开始"));
-                    config.guides.push(guide(result.time4_start, result.time4_end, "时段2-结束"));
+                    chart.guides.push(guide(result.time3_start, result.time3_end, "时段2-开始"));
+                    chart.guides.push(guide(result.time4_start, result.time4_end, "时段2-结束"));
                 }
                 // 遍历显示
                 $.each(result.data, function (i, data) {
@@ -143,7 +176,7 @@
                         check4 = result.time4_start;
                     }
                     if (data.check3) {
-                        config.dataProvider.push({
+                        chart.dataProvider.push({
                             "category": data.name,
                             "segments": [{
                                 "start": new Date(data.check1),
@@ -160,7 +193,7 @@
                             }]
                         });
                     } else {
-                        config.dataProvider.push({
+                        chart.dataProvider.push({
                             "category": data.name,
                             "segments": [{
                                 "start": new Date(data.check1),
@@ -172,32 +205,14 @@
                         });
                     }
                 });
-                var chart = AmCharts.makeChart("chartdiv", config);
+                chart.validateData();
             });
         }
 
-        var dp = $('.form_date');
-        dp.datetimepicker({
-            language: 'zh-CN',
-            format: "yyyy-mm-dd",
-            weekStart: 1,
-            autoclose: true,
-            todayBtn: true,
-            todayHighlight: true,
-            startView: 2,
-            minView: 2
-        });
-        dp.datetimepicker("setDate", new Date());
-
-        $(".btn").on("click", function () {
-            if ($(this).attr("id") === "query") {
-                var date = $("#date").val();
-                console.log(date);
-            }
-        });
 
         $(document).ready(function () {
-            setChartData();
+            // 获取图表数据
+            getChartData();
         });
     </script>
 {% endblock %}

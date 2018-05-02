@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+
+{% block extrahead %}
+    {% load static %}
+    <!-- jQuery Date Range Picker stylesheet -->
+    <link rel="stylesheet" href="{% static 'jquery-date-range-picker/daterangepicker.min.css' %}">
+    <!-- amCharts stylesheet -->
+    <link rel="stylesheet" href="https://www.amcharts.com/lib/3/plugins/export/export.css" type="text/css" media="all"/>
+    <!-- this page specific stylesheet -->
+    <link rel="stylesheet" href="{% static 'css/chart.css' %}">
+{% endblock %}
+
+{% block content %}
+    <h2>签到统计</h2>
+    <span>时间范围：</span>
+    <input class="input" id="date_range" type="text" value="{{ start|date:"Y-m-d" }} to {% now "Y-m-d" %}">
+    <div id="chartdiv"></div>
+    <div id="info" hidden>暂无数据</div>
+{% endblock %}
+
+{% block extrascript %}
+    <!-- moment script -->
+    <script src="{% static 'js/moment-with-locales.js' %}"></script>
+    <!-- jQuery Date Range Picker script -->
+    <script type="text/javascript" src="{% static 'jquery-date-range-picker/jquery.daterangepicker.min.js' %}"></script>
+    <!-- amCharts script -->
+    <script src="https://www.amcharts.com/lib/3/amcharts.js"></script>
+    <script src="https://www.amcharts.com/lib/3/serial.js"></script>
+    <script src="https://www.amcharts.com/lib/3/themes/light.js"></script>
+    <script src="https://www.amcharts.com/lib/3/plugins/export/export.min.js"></script>
+    <!-- this page specific script -->
+    <script>
+        var chart = AmCharts.makeChart("chartdiv", {
+            "type": "serial",
+            "theme": "light",
+            "listeners": [{
+                "event": "dataUpdated",
+                "method": checkEmptyData
+            }, {
+                "event": "dataUpdated",
+                "method": zoomChart
+            }],
+            "legend": {
+                "horizontalGap": 10,
+                "maxColumns": 1,
+                "position": "right",
+                "useGraphSettings": true,
+                "markerSize": 10
+            },
+            "dataProvider": [],
+            "valueAxes": [{
+                "stackType": "regular",
+                "axisAlpha": 0.3,
+                "gridAlpha": 0
+            }],
+            "graphs": [{
+                "balloonText": "<b>[[title]]</b><br><span style='font-size:14px'>[[category]]: <b>[[value]]</b></span>",
+                "fillColors": "#8EA604",
+                "fillAlphas": 0.8,
+                "labelText": "[[value]]",
+                "lineAlpha": 0.3,
+                "title": "签到",
+                "type": "column",
+                "color": "#000000",
+                "valueField": "check_in"
+            }, {
+                "balloonText": "<b>[[title]]</b><br><span style='font-size:14px'>[[category]]: <b>[[value]]</b></span>",
+                "fillColors": "#F5BB00",
+                "fillAlphas": 0.8,
+                "labelText": "[[value]]",
+                "lineAlpha": 0.3,
+                "title": "请假",
+                "type": "column",
+                "color": "#000000",
+                "valueField": "leave"
+            }, {
+                "balloonText": "<b>[[title]]</b><br><span style='font-size:14px'>[[category]]: <b>[[value]]</b></span>",
+                "fillColors": "#DB222A",
+                "fillAlphas": 0.8,
+                "labelText": "[[value]]",
+                "lineAlpha": 0.3,
+                "title": "缺勤",
+                "type": "column",
+                "color": "#000000",
+                "valueField": "absenteeism"
+            }],
+            "categoryField": "name",
+            "categoryAxis": {
+                "gridPosition": "start",
+                "axisAlpha": 0,
+                "gridAlpha": 0,
+                "position": "left"
+            },
+            "mouseWheelScrollEnabled": true,
+            "chartScrollbar": {
+                "autoGridCount": true
+            },
+            "export": {
+                "enabled": true
+            }
+        });
+
+        function checkEmptyData() {
+            if (0 === chart.dataProvider.length) {
+                $('#chartdiv').hide();
+                $('#info').show();
+            } else {
+                $('#chartdiv').show();
+                $('#info').hide();
+            }
+        }
+
+        function zoomChart() {
+            // 初始不显示过多数据
+            // different zoom methods can be used - zoomToIndexes, zoomToDates, zoomToCategoryValues
+            if (chart.dataProvider.length > 10) {
+                chart.zoomToIndexes(0, 9);
+            }
+        }
+
+        function getChartData() {
+            var date_range = $('#date_range').val();
+            $.getJSON("{% url 'check_in_status' %}?date_range=" + date_range, function (result) {
+                console.log(result.data);
+                chart.dataProvider = result.data;
+                chart.validateData();
+            });
+        }
+
+        $(document).ready(function () {
+            // 初始化日期范围选择组件
+            $('#date_range').dateRangePicker({
+                autoClose: true,
+                language: 'cn',
+                startOfWeek: 'monday',
+                startDate: '{{ setting.start_date|date:"Y-m-d" }}',
+                endDate: '{% now "Y-m-d" %}',
+                showShortcuts: true,
+                shortcuts:
+                    {
+                        'prev-days': [3, 5, 7],
+                        'prev': ['week', 'month'],
+                        'next-days': null,
+                        'next': null
+                    }
+            }).bind('datepicker-change', function (event, obj) {
+                getChartData();
+            });
+            // 获取图表数据
+            getChartData();
+        });
+    </script>
+{% endblock %}

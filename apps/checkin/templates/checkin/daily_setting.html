@@ -189,25 +189,27 @@
         // 初始化星期选择
         var week_option = $('#{{ form.week_option.id_for_label }}');
         if (!week_option.val()) {
-            week_option.val("1111100");
+            week_option.val("01234");
         }
         var options = week_option.val().split('');
+        console.log(options);
         for (var i = 0; i < 7; i++) {
-            if (options[i] === '1') {
+            if ($.inArray('' + i, options) !== -1) {
                 $('#xq' + (i + 1)).attr('checked', 'true');
             } else {
                 $('#xq' + (i + 1)).removeAttr('checked');
             }
         }
         $('input.labelauty').change(function () {
-            var index = this.id.slice(2, 3) * 1 - 1;
-            if (options[index] === '1') {
-                options[index] = '0';
+            var num = this.id.slice(2, 3) * 1 - 1;
+            var index = $.inArray('' + num, options)
+            if (index !== -1) {
+                options.splice(index, 1);
             } else {
-                options[index] = '1';
+                options.push('' + num);
             }
             week_option.val(options.join(''));
-            {#console.log(week_option.val());#}
+            console.log(week_option.val());
         });
         // 初始化时间区间
         var times = $('#id_times');
