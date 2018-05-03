@@ -12,7 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 from io import BytesIO
 
 from account.models import Postgraduate
-from account.views import get_login_user
+from account.views import get_login_user, login_required
 from leave.models import Leave
 from .check_in_code import CheckInCode
 from .models import DailyCheckIn, Computer, TempCheckInSetting, DailyCheckInSetting
@@ -99,10 +99,34 @@ def daily_setting(request):
 
 
 def computer_list(request):
-    response_data = dict()
-    response_data['teacher'] = teacher = get_login_user(request)
-    response_data['computer_list'] = Computer.objects.filter(teacher=teacher).all()
-    return render(request, 'checkin/computer_list.html', response_data)
+    if request.method == 'GET':
+        teacher = get_login_user(request)
+        response = dict(teacher=teacher)
+        if request.GET.get('table'):
+            limit = int(request.GET.get('limit'))
+            offset = int(request.GET.get('offset'))
+            search = request.GET.get('search')
+            sort_column = request.GET.get('sort')
+            order = request.GET.get('order')
+            computers = Computer.objects.filter(teacher=teacher)
+            if search:
+                computers = computers.filter(name__icontains=search)
+            if sort_column:
+                sort_column = sort_column.replace('computer_', '')
+                if sort_column in ['name']:
+                    if order == 'desc':
+                        sort_column = '-{}'.format(sort_column)
+                    computers = computers.order_by(sort_column)
+            total = computers.count()
+            rows = list()
+            for computer in computers:
+                rows.append({
+                    'computer_name': computer.name,
+                    'computer_cpu_id': computer.cpu_id
+                })
+            rows = rows[offset:offset + limit]
+            return JsonResponse(dict(total=total, rows=rows))
+        return render(request, 'checkin/computer_list.html', response)
 
 
 def computer_add(request):
@@ -119,6 +143,17 @@ def computer_add(request):
         form = ComputerForm()
     response_data['form'] = form
     return render(request, 'checkin/computer_add.html', response_data)
+
+
+@csrf_exempt
+@login_required
+def computer_delete(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        teacher = get_login_user(request)
+        if name:
+            Computer.objects.get(teacher=teacher, name=name).delete()
+            return JsonResponse({'result': True})
 
 
 def show_check_in(request):

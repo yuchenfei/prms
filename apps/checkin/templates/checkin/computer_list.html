@@ -1,23 +1,62 @@
 {% extends 'base.html' %}
 
+{% block extrahead %}
+    {% load staticfiles %}
+    <link href="{% static 'bootstrap-table/css/bootstrap-table.min.css' %}" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
     <h2>计算机列表</h2>
-    <table class="table">
-        <thead>
-        <tr>
-            <th colspan="col">序号</th>
-            <th colspan="col">名称</th>
-            <th colspan="col">CPU ID</th>
-        </tr>
-        </thead>
-        {% for computer in computer_list %}
-            <tr>
-                <th colspan="row">{{ forloop.counter }}</th>
-                <td>{{ computer.name }}</td>
-                <td>{{ computer.cpu_id }}</td>
-            </tr>
-        {% endfor %}
+    <table id="table"></table>
+{% endblock %}
 
-    </table>
+{% block extrascript %}
+    <script src="{% static 'bootstrap-table/js/bootstrap-table.min.js' %}"></script>
+    <script src="{% static 'bootstrap-table/js/locales/bootstrap-table-zh-CN.min.js' %}"></script>
+    <script>
+        function operateFormatter(value, row, index) {
+            return [
+                '<button type="button" class="RoleOfDelete btn btn-danger btn-sm">删除</button>'
+            ].join('');
+        }
+
+        window.operateEvents = {
+            'click .RoleOfDelete': function (e, value, row, index) {
+                $.post(
+                    "{% url 'computer_delete' %}",
+                    {'name': row.computer_name},
+                    function (response) {
+                        if (response.result)
+                            $('#table').bootstrapTable('refresh');
+                    }
+                )
+            }
+        };
+
+        $('#table').bootstrapTable({
+            url: "{% url 'computer_list' %}?table=true",
+            pagination: true,
+            sidePagination: "server",
+            pageList: [10, 20, 50, 100, 200],
+            pageSize: 20,
+            search: true,
+            showRefresh: true,
+            showColumns: true,
+            uniqueId: 'computer_name',
+            columns: [{
+                field: 'computer_name',
+                title: '计算机名',
+                sortable: true
+            }, {
+                field: 'computer_cpu_id',
+                title: 'CPU ID'
+            }, {
+                field: 'operate',
+                title: '操作',
+                events: operateEvents,
+                formatter: operateFormatter
+            }]
+        });
+    </script>
 {% endblock %}
 

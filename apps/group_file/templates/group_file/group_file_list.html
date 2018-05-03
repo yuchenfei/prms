@@ -25,7 +25,6 @@
 
         window.operateEvents = {
             'click .RoleOfDelete': function (e, value, row, index) {
-                console.log(row.group_file_title);
                 $.post(
                     "{% url 'group_file_delete' %}",
                     {'title': row.group_file_title},

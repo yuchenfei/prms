@@ -12,4 +12,5 @@ urlpatterns = [
     url(r'^check_in/status$', views.check_in_status, name='check_in_status'),
     url(r'^computer/list$', views.computer_list, name='computer_list'),
     url(r'^computer/add$', views.computer_add, name='computer_add'),
+    url(r'^computer/delete$', views.computer_delete, name='computer_delete')
 ]
