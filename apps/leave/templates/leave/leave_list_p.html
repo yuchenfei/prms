@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>请假记录</h2>
+    {% if leave_list %}
+        {% for leave in leave_list %}
+            <div class="panel panel-default">
+                <div class="panel-heading clearfix">
+                    请假日期：<span class="label label-info">{{ leave.date }}</span>
+                    <div class="pull-right">
+                        提交时间：<span class="label label-info">{{ leave.time_of_submission }}</span>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    请假理由：{{ leave.excuse }}
+                </div>
+                <div class="panel-footer">
+                    {% if leave.state is None %}
+                        <span class="label label-warning">未批复</span>
+                    {% else %}
+                        {% if leave.state %}
+                            <span class="label label-success" role="alert">已批准</span>
+                        {% else %}
+                            <span class="label label-danger" role="alert">已回拒</span>
+                        {% endif %}
+                        <div class="pull-right">处理时间：{{ leave.time_of_processing }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+        <div class="pull-right">
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    {% if leave_list.has_previous %}
+                        <li>
+                            <a href="{% url 'leave_list_p' %}?page={{ leave_list.previous_page_number }}"
+                               aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="disabled">
+                        <span>
+                            <span aria-hidden="true">&laquo;</span>
+                        </span>
+                        </li>
+                    {% endif %}
+                    {% for i in range %}
+                        {% if page == i %}
+                            <li class="active"><a href="{% url 'leave_list_p' %}?page={{ i }}">{{ i }}</a></li>
+                        {% else %}
+                            <li><a href="{% url 'leave_list_p' %}?page={{ i }}">{{ i }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    {% if leave_list.has_next %}
+                        <li>
+                            <a href="{% url 'leave_list_p' %}?page={{ leave_list.next_page_number }}"
+                               aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="disabled">
+                        <span>
+                            <span aria-hidden="true">&raquo;</span>
+                        </span>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    {% endif %}
+
+{% endblock %}

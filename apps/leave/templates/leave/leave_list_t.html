@@ -1,25 +1,30 @@
 {% extends 'base.html' %}
 
-
 {% block content %}
     <h2>请假管理</h2>
     {% for leave in leave_list %}
         <div class="panel panel-default">
             <div class="panel-heading clearfix">
                 <div class="panel-title pull-left">{{ leave.postgraduate.name }}</div>
-                <div class="pull-right">提交时间：{{ leave.time_of_submission }}</div>
+                <div class="pull-right">
+                    提交时间：<span class="label label-info">{{ leave.time_of_submission }}</span>
+                </div>
             </div>
             <div class="panel-body">
-                请假日期：{{ leave.date }}<br>
-                请假理由：{{ leave.excuse }}
+                <div style="margin-bottom: 5px">
+                    请假日期：<span class="label label-info">{{ leave.date }}</span>
+                </div>
+                <div>
+                    请假理由：{{ leave.excuse }}
+                </div>
             </div>
             <div class="panel-footer">
                 {% if leave.state is None %}
                     <form action="{% url 'processes_leave' leave.id %}" method="post">
                         {% csrf_token %}
                         <input type="text" name="result" hidden>
-                        <input type="button" class="btn btn-success" value="批准">
-                        <input type="button" class="btn btn-danger" value="拒绝">
+                        <input type="button" class="btn btn-sm btn-success" value="批准">
+                        <input type="button" class="btn btn-sm btn-danger" value="拒绝">
                     </form>
                 {% else %}
                     {% if leave.state %}

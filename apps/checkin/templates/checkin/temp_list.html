@@ -6,30 +6,32 @@
         {% for item in items %}
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <b>临时签到 - {{ item.name }}</b>
+                    <b>{{ item.name }}</b>
+                    <span class="label label-info">{{ item.teacher.name }}</span>
                     {% if item.is_group %}
-                        <div class="pull-right">
-                            <span class="label label-info">组签到</span>
-                        </div>
+                        <span class="label label-primary">组签到</span>
                     {% endif %}
+                    <div class="pull-right">
+                        <span class="label label-warning">{{ item.date }} {{ item.time }}</span>
+                    </div>
                 </div>
                 <div class="panel-body">
-                    <h4>教师：</h4>
-                    <span class="label label-info">{{ item.teacher.name }}</span>
-                    <h4>时间：</h4>
-                    <span class="label label-info">{{ item.date }} {{ item.time }}</span>
-                    <h4>签到区间：</h4>
-                    <span class="label label-info">{{ item.start_time }}</span> - <span
-                        class="label label-info">{{ item.end_time }}</span>
-                    <h4>签到条件：</h4>
-                    {% if item.computer.all %}
-                        指定计算机：
-                        {% for computer in item.computer.all %}
-                            <span class="label label-info">{{ computer.name }}</span>
-                        {% endfor %}
-                    {% else %}
-                        <span class="label label-default">未指定</span>
-                    {% endif %}
+                    <div style="margin-bottom: 5px">
+                        <span>签到区间：</span>
+                        <span class="label label-success">{{ item.start_time }}</span> - <span
+                            class="label label-danger">{{ item.end_time }}</span>
+                    </div>
+                    <div>
+                        <span>签到条件：</span>
+                        {% if item.computer.all %}
+                            <span>指定计算机</span>
+                            {% for computer in item.computer.all %}
+                                <span class="label label-info">{{ computer.name }}</span>
+                            {% endfor %}
+                        {% else %}
+                            <span class="label label-default">未指定</span>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         {% endfor %}
@@ -71,16 +73,10 @@
                         </span>
                         </li>
                     {% endif %}
-
                 </ul>
             </nav>
         </div>
     {% else %}
-        <div class="panel panel-default">
-            <div class="panel-heading"><b>临时签到</b></div>
-            <div class="panel-body">
-                <p>暂无临时签到</p>
-            </div>
-        </div>
+        <p>暂无临时签到</p>
     {% endif %}
 {% endblock %}

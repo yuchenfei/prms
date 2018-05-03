@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
@@ -11,7 +12,7 @@ from leave.models import Leave
 
 def ask_for_leave(request):
     postgraduate = get_login_user(request)
-    response_data = {'postgraduate': postgraduate}
+    response = dict(postgraduate=postgraduate)
     if request.method == 'POST':
         date = request.POST.get('date')
         excuse = request.POST.get('excuse')
@@ -23,11 +24,32 @@ def ask_for_leave(request):
             excuse=excuse,
             time_of_submission=datetime.now()
         )
-    response_data['leave_list'] = Leave.objects.filter(postgraduate=postgraduate).all()
-    return render(request, 'leave/ask_for_leave.html', response_data)
+        return redirect('leave_list_p')
+    return render(request, 'leave/ask_for_leave.html', response)
 
 
-def leave_list(request):
+def list_list_p(request):
+    if request.method == 'GET':
+        page = request.GET.get('page', '1')
+        postgraduate = get_login_user(request)
+        response = dict(postgraduate=postgraduate)
+        leaves = Leave.objects.filter(postgraduate=postgraduate).all()
+        paginator = Paginator(leaves, 5)  # 分页
+        try:
+            leave_list = paginator.page(int(page))
+        except PageNotAnInteger:
+            leave_list = paginator.page(1)
+            page = 1
+        except EmptyPage:
+            leave_list = paginator.page(paginator.num_pages)
+            page = paginator.num_pages
+        response['leave_list'] = leave_list
+        response['range'] = paginator.page_range
+        response['page'] = int(page)
+        return render(request, 'leave/leave_list_p.html', response)
+
+
+def leave_list_t(request):
     response_data = dict()
     response_data['teacher'] = teacher = get_login_user(request)
     if teacher.is_leader:
@@ -40,7 +62,7 @@ def leave_list(request):
     else:
         leave_query = Leave.objects.filter(state=None, postgraduate__in=postgraduates)
     response_data['leave_list'] = leave_query.all()
-    return render(request, 'leave/leave_list.html', response_data)
+    return render(request, 'leave/leave_list_t.html', response_data)
 
 
 def processes_leave(request, leave_id):
@@ -52,4 +74,4 @@ def processes_leave(request, leave_id):
             leave.approve(teacher)
         elif result == 'reject':
             leave.reject(teacher)
-    return redirect('leave_list')
+    return redirect('leave_list_t')

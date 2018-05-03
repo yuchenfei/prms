@@ -66,12 +66,6 @@
                         <li class="{% nav_class 'computer_add' %}">
                             <a href="{% url 'computer_add' %}">添加计算机</a>
                         </li>
-                        {#                        <li>#}
-                        {#                            <a href="#">GPS地点列表</a>#}
-                        {#                        </li>#}
-                        {#                        <li>#}
-                        {#                            <a href="#">添加GPS地点</a>#}
-                        {#                        </li>#}
                     </ul>
                 </li>
                 <li class="sub-menu {% nav_class 'show_check_in' 'check_in_status' %}">
@@ -98,8 +92,8 @@
                         </li>
                     </ul>
                 </li>
-                <li class="{% nav_class 'leave_list' %}">
-                    <a href="{% url 'leave_list' %}">请假管理</a>
+                <li class="{% nav_class 'leave_list_t' %}">
+                    <a href="{% url 'leave_list_t' %}">请假管理</a>
                 </li>
                 <li class="{% nav_class 'brief_list_t' %}">
                     <a href="{% url 'brief_list_t' %}">查看小结</a>
@@ -135,14 +129,22 @@
                         </li>
                     </ul>
                 </li>
+                <li class="sub-menu {% nav_class 'leave_list_p' 'ask_for_leave' %}">
+                    <a href="javascript:void(0);">我的请假<i class="glyphicon glyphicon-chevron-right pull-right"></i></a>
+                    <ul>
+                        <li class="{% nav_class 'leave_list_p' %}">
+                            <a href="{% url 'leave_list_p' %}">请假记录</a>
+                        </li>
+                        <li class="{% nav_class 'ask_for_leave' %}">
+                            <a href="{% url 'ask_for_leave' %}">申请请假</a>
+                        </li>
+                    </ul>
+                </li>
                 {% if postgraduate.teacher.group %}
                     <li class="{% nav_class 'group_file_list' %}">
                         <a href="{% url 'group_file_list' %}">查看组文件</a>
                     </li>
                 {% endif %}
-                <li class="{% nav_class 'ask_for_leave' %}">
-                    <a href="{% url 'ask_for_leave' %}">请假申请</a>
-                </li>
                 <li class="{% nav_class 'setting_p' %}">
                     <a href="{% url 'setting_p' %}">个人设置</a>
                 </li>

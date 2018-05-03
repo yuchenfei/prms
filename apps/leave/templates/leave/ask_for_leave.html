@@ -40,29 +40,4 @@
         </div>
         <button class="btn btn-lg btn-primary btn-block" type="submit">提交</button>
     </form>
-    <h2>申请记录</h2>
-    {% for leave in leave_list %}
-        <div class="panel panel-default">
-            <div class="panel-heading clearfix">
-                <div class="panel-title pull-left">{{ leave.postgraduate.name }}</div>
-                <div class="pull-right">提交时间：{{ leave.time_of_submission }}</div>
-            </div>
-            <div class="panel-body">
-                请假日期：{{ leave.date }}<br>
-                请假理由：{{ leave.excuse }}
-            </div>
-            <div class="panel-footer">
-                {% if leave.state is None %}
-                    未批复
-                {% else %}
-                    {% if leave.state %}
-                        <span class="label label-success" role="alert">已批准</span>
-                    {% else %}
-                        <span class="label label-danger" role="alert">已回拒</span>
-                    {% endif %}
-                    <div class="pull-right">处理时间：{{ leave.time_of_processing }}</div>
-                {% endif %}
-            </div>
-        </div>
-    {% endfor %}
 {% endblock %}
