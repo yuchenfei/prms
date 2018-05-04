@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from operator import itemgetter
 
 import qrcode
+from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db.models import Q
@@ -58,7 +59,7 @@ def temp_list(request):
         return render(request, 'checkin/temp_list.html', response_data)
 
 
-def temp_setting(request):
+def temp_new(request):
     response_data = dict()
     teacher = get_login_user(request)
     response_data['teacher'] = teacher
@@ -76,6 +77,15 @@ def temp_setting(request):
         form = TempCheckInSettingForm()
     response_data['form'] = form
     return render(request, 'checkin/temp_setting.html', response_data)
+
+
+def temp_delete(request, temp_id):
+    temp_setting = TempCheckInSetting.objects.get(id=temp_id)
+    if temp_setting:
+        name = temp_setting.name
+        temp_setting.delete()
+        messages.add_message(request, messages.INFO, '成功删除 {}'.format(name))
+    return redirect('check_in_temp_list')
 
 
 def daily_setting(request):
@@ -129,7 +139,7 @@ def computer_list(request):
         return render(request, 'checkin/computer_list.html', response)
 
 
-def computer_add(request):
+def computer_new(request):
     response_data = dict()
     response_data['teacher'] = teacher = get_login_user(request)
     if request.method == 'POST':
@@ -142,7 +152,7 @@ def computer_add(request):
     else:
         form = ComputerForm()
     response_data['form'] = form
-    return render(request, 'checkin/computer_add.html', response_data)
+    return render(request, 'checkin/computer_new.html', response_data)
 
 
 @csrf_exempt

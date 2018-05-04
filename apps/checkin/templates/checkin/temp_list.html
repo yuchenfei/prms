@@ -2,6 +2,11 @@
 
 {% block content %}
     <h2>临时签到列表</h2>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-danger" role="alert">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
     {% if items %}
         {% for item in items %}
             <div class="panel panel-default">
@@ -31,6 +36,14 @@
                         {% else %}
                             <span class="label label-default">未指定</span>
                         {% endif %}
+                    </div>
+                </div>
+                <div class="panel-footer clearfix">
+                    <div class="pull-right">
+                        <button class="btn btn-sm btn-danger"
+                                onclick="window.location.href='{% url 'check_in_temp_delete' item.id %}'"
+                                {% if brief.have_read %} disabled{% endif %}>删除
+                        </button>
                     </div>
                 </div>
             </div>
