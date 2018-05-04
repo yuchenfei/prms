@@ -185,7 +185,6 @@ def postgraduate_list(request):
                 postgraduates = teacher.postgraduate_set.filter(Q(phone__icontains=search) | Q(name__icontains=search))
             else:
                 postgraduates = teacher.postgraduate_set.all()
-
             if sort_column:
                 sort_column = sort_column.replace('postgraduate_', '')
                 if sort_column in ['phone', 'name', 'teacher', 'school', 'classes']:
