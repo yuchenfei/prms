@@ -1,5 +1,10 @@
 {% extends 'base.html' %}
 
+{% block extrahead %}
+    {% load staticfiles %}
+    <link href="{% static 'bootstrap-table/css/bootstrap-table.min.css' %}" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
     <h2>组教师列表</h2>
     {% if messages %}
@@ -7,33 +12,70 @@
             <div class="alert alert-info" role="alert">{{ message }}</div>
         {% endfor %}
     {% endif %}
-    <table class="table">
-        <thead>
-        <tr>
-            <th>#</th>
-            <th>手机号</th>
-            <th>姓名</th>
-            <th>学校</th>
-            <th>专业</th>
-            <th>操作</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for member in members %}
-            <tr>
-                <th scope="row">{{ forloop.counter }}</th>
-                <td>{{ member.phone }}</td>
-                <td>{{ member.name }}</td>
-                <td>{{ member.school|default_if_none:'未填写' }}</td>
-                <td>{{ member.specialty|default_if_none:'未填写' }}</td>
-                <td>
-                    {% if member != teacher %}
-                        <a class="btn btn-danger btn-sm" href="{% url 'g_remove' %}?uuid={{ member.uuid }}">移出组</a>
-                    {% endif %}
-                </td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+    <table id="table"></table>
+{% endblock %}
+
+{% block extrascript %}
+    <script src="{% static 'bootstrap-table/js/bootstrap-table.min.js' %}"></script>
+    <script src="{% static 'bootstrap-table/js/locales/bootstrap-table-zh-CN.min.js' %}"></script>
+    <script>
+        function operateFormatter(value, row, index) {
+            if (row.member_uuid !== '{{ teacher.uuid }}') {
+                return [
+                    '<button type="button" class="RoleOfDelete btn btn-danger btn-sm">移除组</button>'
+                ].join('');
+            } else {
+                return '组长'
+            }
+        }
+
+        window.operateEvents = {
+            'click .RoleOfDelete': function (e, value, row, index) {
+                $.post(
+                    "{% url 'g_remove' %}",
+                    {'uuid': row.member_uuid},
+                    function (response) {
+                        console.log(response);
+                        if (response.result)
+                            window.location.reload();
+                    }
+                )
+            }
+        };
+        $('#table').bootstrapTable({
+            url: "{% url 'g_members' %}?table=true",
+            pagination: true,
+            sidePagination: "server",
+            pageList: [10, 20, 50, 100, 200],
+            pageSize: 20,
+            search: true,
+            showRefresh: true,
+            showColumns: true,
+            uniqueId: 'member_phone',
+            columns: [{
+                field: 'member_phone',
+                title: '手机好',
+                sortable: true
+            }, {
+                field: 'member_name',
+                title: '姓名',
+                sortable: true
+            }, {
+                field: 'member_school',
+                title: '学校',
+                sortable: true
+            }, {
+                field: 'member_specialty',
+                title: '专业',
+                sortable: true
+            }, {
+                field: 'operate',
+                title: '操作',
+                events: operateEvents,
+                formatter: operateFormatter
+            }]
+        });
+        $("input[placeholder='搜索']").attr('placeholder', '搜索（手机号、姓名）') // 修改搜索提示
+    </script>
 {% endblock %}
 

@@ -8,6 +8,7 @@ from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.utils.datastructures import MultiValueDictKeyError
+from django.views.decorators.csrf import csrf_exempt
 from openpyxl import load_workbook
 
 from api.models import Device
@@ -115,10 +116,38 @@ def teacher_home(request):
 
 @login_required
 def members(request):
-    response = dict()
-    response['teacher'] = teacher = get_login_user(request)
-    response['members'] = Teacher.objects.filter(group__leader=teacher).all()
-    return render(request, 'account/members.html', response)
+    if request.method == 'GET':
+        teacher = get_login_user(request)
+        response = dict(teacher=teacher)
+        if request.GET.get('table'):
+            limit = int(request.GET.get('limit'))
+            offset = int(request.GET.get('offset'))
+            search = request.GET.get('search')
+            sort_column = request.GET.get('sort')
+            order = request.GET.get('order')
+            teacher_query = Teacher.objects.filter(group__leader=teacher)
+            if search:
+                teacher_query = teacher_query.filter(Q(phone__icontains=search) | Q(name__icontains=search))
+            if sort_column:
+                sort_column = sort_column.replace('member_', '')
+                if sort_column in ['phone', 'name', 'school', 'specialty']:
+                    if order == 'desc':
+                        sort_column = '-{}'.format(sort_column)
+                    teacher_query = teacher_query.order_by(sort_column)
+            total = teacher_query.count()
+            rows = []
+            for teacher in teacher_query:
+                rows.append({
+                    'member_uuid': teacher.uuid,
+                    'member_phone': teacher.phone,
+                    'member_name': teacher.name,
+                    'member_school': teacher.school,
+                    'member_specialty': teacher.specialty
+                })
+            rows = rows[offset:offset + limit]
+            return JsonResponse(dict(total=total, rows=rows))
+        response['members'] = Teacher.objects.filter(group__leader=teacher).all()
+        return render(request, 'account/members.html', response)
 
 
 @login_required
@@ -157,16 +186,17 @@ def handle_invite(request, group_id):
         return redirect('teacher_home')
 
 
+@csrf_exempt
 @login_required
 def remove(request):
-    if request.method == 'GET':
-        uuid = request.GET.get('uuid')
+    if request.method == 'POST':
+        uuid = request.POST.get('uuid')
         if uuid:
             teacher = Teacher.objects.get(uuid=uuid)
             teacher.group = None
             teacher.save()
             messages.add_message(request, messages.INFO, '{} 已被移出组'.format(teacher.name))
-    return redirect('g_members')
+            return JsonResponse(dict(result=True))
 
 
 @login_required
