@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from django.contrib import messages
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db.models import Q
 from django.http import HttpResponse
@@ -17,14 +18,17 @@ def ask_for_leave(request):
         date = request.POST.get('date')
         excuse = request.POST.get('excuse')
         date = datetime.strptime(date, '%Y-%m-%d').date()
-        # TODO:是否重复
-        Leave.objects.create(
-            postgraduate=postgraduate,
-            date=date,
-            excuse=excuse,
-            time_of_submission=datetime.now()
-        )
-        return redirect('leave_list_p')
+        if not Leave.objects.filter(postgraduate=postgraduate, date=date).exists():
+            Leave.objects.create(
+                postgraduate=postgraduate,
+                date=date,
+                excuse=excuse,
+                time_of_submission=datetime.now()
+            )
+            return redirect('leave_list_p')
+        else:
+            # 当日已请过假
+            messages.add_message(request, messages.WARNING, '{} 已请过假期'.format(date))
     return render(request, 'leave/ask_for_leave.html', response)
 
 
@@ -33,8 +37,9 @@ def list_list_p(request):
         page = request.GET.get('page', '1')
         postgraduate = get_login_user(request)
         response = dict(postgraduate=postgraduate)
-        leaves = Leave.objects.filter(postgraduate=postgraduate).all()
-        paginator = Paginator(leaves, 5)  # 分页
+        leave_query = Leave.objects.filter(postgraduate=postgraduate)
+        leave_query = leave_query.order_by('-time_of_submission')
+        paginator = Paginator(leave_query, 5)
         try:
             leave_list = paginator.page(int(page))
         except PageNotAnInteger:

@@ -4,22 +4,6 @@
     <link href="/static/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
 {% endblock %}
 
-{% block extrascript %}
-    <script src="/static/bootstrap-datetimepicker/js/bootstrap-datetimepicker.js"></script>
-    <script src="/static/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.zh-CN.js"></script>
-    <script>
-        $('.form_date').datetimepicker({
-            language: 'zh-CN',
-            format: "yyyy-mm-dd",
-            weekStart: 1,
-            autoclose: true,
-            todayBtn: true,
-            todayHighlight: true,
-            minView: 2
-        })
-    </script>
-{% endblock %}
-
 {% block content %}
     <h2>请假申请</h2>
     <form class="form" action="" method="post">
@@ -38,6 +22,27 @@
             <label for="excuse" class="control-label">请假理由</label>
             <textarea class="form-control" rows="5" id="excuse" name="excuse" required></textarea>
         </div>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-warning" role="alert">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
         <button class="btn btn-lg btn-primary btn-block" type="submit">提交</button>
     </form>
+{% endblock %}
+
+{% block extrascript %}
+    <script src="/static/bootstrap-datetimepicker/js/bootstrap-datetimepicker.js"></script>
+    <script src="/static/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.zh-CN.js"></script>
+    <script>
+        $('.form_date').datetimepicker({
+            language: 'zh-CN',
+            format: "yyyy-mm-dd",
+            weekStart: 1,
+            autoclose: true,
+            todayBtn: true,
+            todayHighlight: true,
+            minView: 2
+        })
+    </script>
 {% endblock %}
