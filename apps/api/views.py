@@ -81,24 +81,27 @@ def items(request):
             # 日常签到相关
             if DailyCheckInSetting.objects.filter(teacher=postgraduate.teacher).exists():
                 daily_setting = DailyCheckInSetting.objects.get(teacher=postgraduate.teacher)
-                times = daily_setting.times
-                json['daily_times'] = times
-                for i in range(times):
-                    index = i + 1
-                    start = 'time{}_start'.format(index)
-                    end = 'time{}_end'.format(index)
-                    json['daily_time_interval'] += getattr(daily_setting, start).strftime('%H:%M')
-                    json['daily_time_interval'] += '-'
-                    json['daily_time_interval'] += getattr(daily_setting, end).strftime('%H:%M')
-                    json['daily_time_interval'] += ';'
-                today_check_in = DailyCheckIn.objects.filter(date=datetime.today(), postgraduate=postgraduate)
-                if today_check_in.exists():
+                if str(datetime.today().weekday()) in daily_setting.week_option:
+                    times = daily_setting.times
+                    json['daily_times'] = times
                     for i in range(times):
                         index = i + 1
-                        if getattr(today_check_in[0], 'check{}'.format(index)):
-                            json['daily_ok'].append(index)
+                        start = 'time{}_start'.format(index)
+                        end = 'time{}_end'.format(index)
+                        json['daily_time_interval'] += getattr(daily_setting, start).strftime('%H:%M')
+                        json['daily_time_interval'] += '-'
+                        json['daily_time_interval'] += getattr(daily_setting, end).strftime('%H:%M')
+                        json['daily_time_interval'] += ';'
+                    today_check_in = DailyCheckIn.objects.filter(date=datetime.today(), postgraduate=postgraduate)
+                    if today_check_in.exists():
+                        for i in range(times):
+                            index = i + 1
+                            if getattr(today_check_in[0], 'check{}'.format(index)):
+                                json['daily_ok'].append(index)
+                else:
+                    json['daily_times'] = 0
             else:
-                json['daily_times'] = 0
+                json['daily_times'] = -1
             # 临时签到相关
             if postgraduate.teacher.group:
                 q1 = Q(teacher=postgraduate.teacher, date=datetime.today())
