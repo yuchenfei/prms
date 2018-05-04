@@ -2,63 +2,93 @@
 
 {% block content %}
     <h2>请假管理</h2>
-    {% for leave in leave_list %}
-        <div class="panel panel-default">
-            <div class="panel-heading clearfix">
-                <div class="panel-title pull-left">{{ leave.postgraduate.name }}</div>
-                <div class="pull-right">
-                    提交时间：<span class="label label-info">{{ leave.time_of_submission }}</span>
+    {% if leave_list %}
+
+        {% for leave in leave_list %}
+            <div class="panel panel-default">
+                <div class="panel-heading clearfix">
+                    <div class="panel-title pull-left">{{ leave.postgraduate.name }}</div>
+                    <div class="pull-right">
+                        提交时间：<span class="label label-info">{{ leave.time_of_submission }}</span>
+                    </div>
                 </div>
-            </div>
-            <div class="panel-body">
-                <div style="margin-bottom: 5px">
-                    请假日期：<span class="label label-info">{{ leave.date }}</span>
+                <div class="panel-body">
+                    <div style="margin-bottom: 5px">
+                        请假日期：<span class="label label-info">{{ leave.date }}</span>
+                    </div>
+                    <div>
+                        请假理由：{{ leave.excuse }}
+                    </div>
                 </div>
-                <div>
-                    请假理由：{{ leave.excuse }}
-                </div>
-            </div>
-            <div class="panel-footer">
-                {% if leave.state is None %}
-                    <form action="{% url 'processes_leave' leave.id %}" method="post">
-                        {% csrf_token %}
-                        <input type="text" name="result" hidden>
-                        <input type="button" class="btn btn-sm btn-success" value="批准">
-                        <input type="button" class="btn btn-sm btn-danger" value="拒绝">
-                    </form>
-                {% else %}
-                    {% if leave.state %}
-                        <span class="label label-success" role="alert">已批准</span>
+                <div class="panel-footer clearfix">
+                    {% if leave.state is None %}
+                        <div class="pull-right">
+                            <form action="{% url 'processes_leave' leave.id %}" method="post">
+                                {% csrf_token %}
+                                <input type="text" name="result" hidden>
+                                <input type="button" class="btn btn-sm btn-success" value="批准">
+                                <input type="button" class="btn btn-sm btn-danger" value="拒绝">
+                            </form>
+                        </div>
                     {% else %}
-                        <span class="label label-danger" role="alert">已回拒</span>
+                        {% if leave.state %}
+                            <span class="label label-success" role="alert">已批准</span>
+                        {% else %}
+                            <span class="label label-danger" role="alert">已回拒</span>
+                        {% endif %}
+                        <div class="pull-right">处理时间：{{ leave.time_of_processing }}</div>
                     {% endif %}
-                    <div class="pull-right">处理时间：{{ leave.time_of_processing }}</div>
-                {% endif %}
+                </div>
             </div>
+        {% endfor %}
+        <div class="pull-right">
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    {% if items.has_previous %}
+                        <li>
+                            <a href="{% url 'leave_list_t' %}?page={{ leave_list.previous_page_number }}"
+                               aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="disabled">
+                        <span>
+                            <span aria-hidden="true">&laquo;</span>
+                        </span>
+                        </li>
+                    {% endif %}
+                    {% for i in range %}
+                        {% if page == i %}
+                            <li class="active"><a href="{% url 'leave_list_t' %}?page={{ i }}">{{ i }}</a></li>
+                        {% else %}
+                            <li><a href="{% url 'leave_list_t' %}?page={{ i }}">{{ i }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    {% if items.has_next %}
+                        <li>
+                            <a href="{% url 'leave_list_t' %}?page={{ leave_list.next_page_number }}"
+                               aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="disabled">
+                        <span>
+                            <span aria-hidden="true">&raquo;</span>
+                        </span>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
         </div>
-    {% endfor %}
-    {% if not leave_list %}
+    {% else %}
         <p>目前无未处理的请假</p>
     {% endif %}
-    <form name="show_all" method="get">
-        <input type="text" name="show_all" value="true" hidden>
-    </form>
-    <a href="#" id="show_all_link" onclick="show()">显示已批复的记录</a>
 {% endblock %}
 
 {% block extrascript %}
     <script>
-        function show() {
-            $("form[name='show_all']").submit();
-        }
-
-        function getUrlParam(name) {
-            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
-            var r = window.location.search.substr(1).match(reg);  //匹配目标参数
-            if (r != null) return r[2];
-            return null; //返回参数值
-        }
-
         $(document).ready(function () {
             $("input:button").click(function () {
                 var form = $(this).parent("form");
@@ -70,9 +100,6 @@
                 }
                 form.submit();
             });
-
-            if (getUrlParam('show_all') === 'true')
-                $("#show_all_link").hide();
         })
     </script>
 {% endblock %}
