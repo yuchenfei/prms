@@ -9,7 +9,7 @@ class BriefForm(ModelForm):
         fields = ('content', 'file')
         labels = {
             'content': '内容',
-            'file': '文件'
+            'file': '附件'
         }
         widgets = {
             'content': Textarea(attrs={'class': 'form-control'})

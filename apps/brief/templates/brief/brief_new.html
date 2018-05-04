@@ -5,14 +5,16 @@
     <form class="form" enctype="multipart/form-data" method="post">
         {% csrf_token %}
         <div class="form-group">
+            {{ form.content.label_tag }}
             {{ form.content }}
         </div>
         <div class="form-group">
+            {{ form.file.label_tag }}
             {{ form.file }}
         </div>
         <div class="pull-right">
-            <input class="btn btn-success" type="submit" name="save" value="保存">
-            <input class="btn btn-primary" type="submit" name="commit" value="提交">
+            <input class="btn btn-success" type="submit" name="save" value="仅保存">
+            <input class="btn btn-primary" type="submit" name="commit" value="保存并提交">
         </div>
     </form>
 {% endblock %}

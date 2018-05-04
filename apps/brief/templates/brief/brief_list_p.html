@@ -2,38 +2,92 @@
 
 {% block content %}
     <h2>我的小结</h2>
-    {% for brief in brief_list %}
-        <div class="panel panel-default">
-            <div class="panel-heading clearfix">
-                <div class="panel-title pull-left">{{ brief.date }}</div>
-                <div class="pull-right">
-                    <button class="btn btn-default" onclick="window.location.href='{% url 'brief_edit' brief.id %}'">
-                        编辑
-                    </button>
-                </div>
-            </div>
-            <div class="panel-body">
-                <div class="summary">
-                    {{ brief.content|truncatechars:"100" }}
-                </div>
-                <div class="details">
-                </div>
-            </div>
-            <div class="panel-footer clearfix">
-                {% if not brief.commit %}
-                    <span class="label label-warning" role="alert">未提交</span>
-                {% elif brief.have_read %}
-                    <span class="label label-success" role="alert">已批阅</span>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-danger" role="alert">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+    {% if brief_list %}
+        {% for brief in brief_list %}
+            <div class="panel panel-default">
+                <div class="panel-heading clearfix">
+                    <div class="panel-title pull-left">{{ brief.date }}</div>
                     <div class="pull-right">
-                        <button class="btn btn-default view" value="{% url 'brief_review_p' brief.id %}">查看</button>
+                        <button class="btn btn-sm btn-danger"
+                                onclick="window.location.href='{% url 'brief_delete' brief.id %}'"
+                                {% if brief.have_read %} disabled{% endif %}>删除
+                        </button>
+                        <button class="btn btn-sm btn-default"
+                                onclick="window.location.href='{% url 'brief_edit' brief.id %}'"
+                                {% if brief.have_read %} disabled{% endif %}>编辑
+                        </button>
                     </div>
-                {% else %}
-                    <span class="label label-info" role="alert">未查看</span>
-                {% endif %}
+                </div>
+                <div class="panel-body">
+                    <div class="summary">
+                        {{ brief.content|truncatechars:"100" }}
+                    </div>
+                    <div class="details">
+                    </div>
+                </div>
+                <div class="panel-footer clearfix">
+                    {% if not brief.commit %}
+                        <span class="label label-warning" role="alert">未提交</span>
+                    {% elif brief.have_read %}
+                        <span class="label label-success" role="alert">已批阅</span>
+                        <div class="pull-right">
+                            <button class="btn btn-sm btn-default view" value="{% url 'brief_review_p' brief.id %}">
+                                查看批注
+                            </button>
+                        </div>
+                    {% else %}
+                        <span class="label label-info" role="alert">未查看</span>
+                    {% endif %}
+                </div>
             </div>
+        {% endfor %}
+        <div class="pull-right">
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    {% if items.has_previous %}
+                        <li>
+                            <a href="{% url 'brief_list_p' %}?page={{ brief_list.previous_page_number }}"
+                               aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="disabled">
+                        <span>
+                            <span aria-hidden="true">&laquo;</span>
+                        </span>
+                        </li>
+                    {% endif %}
+                    {% for i in range %}
+                        {% if page == i %}
+                            <li class="active"><a href="{% url 'brief_list_p' %}?page={{ i }}">{{ i }}</a></li>
+                        {% else %}
+                            <li><a href="{% url 'brief_list_p' %}?page={{ i }}">{{ i }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    {% if items.has_next %}
+                        <li>
+                            <a href="{% url 'brief_list_p' %}?page={{ brief_list.next_page_number }}"
+                               aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="disabled">
+                        <span>
+                            <span aria-hidden="true">&raquo;</span>
+                        </span>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
         </div>
-    {% endfor %}
-    {% if not brief_list %}
+    {% else %}
         <p>目前未提交任何小结</p>
     {% endif %}
 {% endblock %}
@@ -46,7 +100,8 @@
             var panel = btn.closest(".panel");
             var summary = panel.find(".summary");
             var details = panel.find(".details");
-            if (btn.html() === '查看') {
+            console.log(btn.html());
+            if (btn.html().trim() === '查看批注') {
                 $.get(
                     url,
                     function (response) {
@@ -59,9 +114,8 @@
             } else {
                 details.hide();
                 summary.show();
-                btn.html('查看');
+                btn.html('查看批注');
             }
-
         })
     </script>
 {% endblock %}

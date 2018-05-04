@@ -1,6 +1,9 @@
 from datetime import datetime
 
 import os
+
+from django.contrib import messages
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.shortcuts import render, redirect
 
 from account.models import Postgraduate, Teacher
@@ -10,20 +13,36 @@ from .models import Brief
 
 
 @login_required
-def brief_list_p(request):
-    response_data = dict()
-    response_data['postgraduate'] = postgraduate = get_login_user(request)
-    response_data['brief_list'] = Brief.objects.filter(submitter=postgraduate).all()
-    return render(request, 'brief/brief_list_p.html', response_data)
-
-
-@login_required
-def brief_list_t(request):
-    response_data = dict()
-    response_data['teacher'] = teacher = get_login_user(request)
-    postgraduates = Postgraduate.objects.filter(teacher=teacher).all()
-    response_data['brief_list'] = Brief.objects.filter(submitter__in=postgraduates, commit=True).all()
-    return render(request, 'brief/brief_list_t.html', response_data)
+def brief_list(request):
+    if request.method == 'GET':
+        page = request.GET.get('page', '1')
+        user = get_login_user(request)
+        if user.__class__ in [Teacher, Postgraduate]:
+            if isinstance(user, Postgraduate):
+                postgraduate = user
+                response = dict(postgraduate=postgraduate)
+                template_name = 'brief/brief_list_p.html'
+                briefs = Brief.objects.filter(submitter=postgraduate)
+            else:
+                teacher = user
+                response = dict(teacher=teacher)
+                template_name = 'brief/brief_list_t.html'
+                postgraduates = Postgraduate.objects.filter(teacher=teacher)
+                briefs = Brief.objects.filter(submitter__in=postgraduates, commit=True)
+            briefs = briefs.order_by('-date')
+            paginator = Paginator(briefs, 5)
+            try:
+                _list = paginator.page(int(page))
+            except PageNotAnInteger:
+                _list = paginator.page(1)
+                page = 1
+            except EmptyPage:
+                _list = paginator.page(paginator.num_pages)
+                page = paginator.num_pages
+            response['brief_list'] = _list
+            response['range'] = paginator.page_range
+            response['page'] = int(page)
+            return render(request, template_name, response)
 
 
 @login_required
@@ -97,3 +116,13 @@ def review(request, brief_id):
     else:
         response_data['postgraduate'] = user
     return render(request, 'brief/html_review.html', response_data)
+
+
+@login_required
+def delete(request, brief_id):
+    if request.method == 'GET':
+        brief = Brief.objects.get(id=brief_id)
+        if brief:
+            brief.delete()
+            messages.add_message(request, messages.INFO, '成功删除')
+        return redirect('brief_list_p')
