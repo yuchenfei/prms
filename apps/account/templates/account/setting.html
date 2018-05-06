@@ -10,18 +10,18 @@
             {% if field.errors %}
                 <div class="form-group has-error">
                     {{ field.label_tag }}
-                    {{ field|add_class:"input-lg form-control" }}
+                    {{ field|add_class:"form-control" }}
                     <span class="help-block">{{ field.errors }}</span>
                 </div>
             {% else %}
                 <div class="form-group">
                     {{ field.label_tag }}
-                    {{ field|add_class:"input-lg form-control" }}
+                    {{ field|add_class:"form-control" }}
                 </div>
             {% endif %}
         {% endfor %}
         <h3>修改密码</h3>
-        <input class="input-lg form-control" id="password1" name="password1" type="password" placeholder="新密码"
+        <input class=" form-control" id="password1" name="password1" type="password" placeholder="新密码"
                autocomplete="off">
         <div class="row">
             <div class="col-sm-3">
@@ -37,7 +37,7 @@
                 <span id="num" class="glyphicon glyphicon-remove" style="color:#FF0004;"></span> 1个数字
             </div>
         </div>
-        <input class="input-lg form-control" id="password2" name="password2" type="password" placeholder="重复密码"
+        <input class=" form-control" id="password2" name="password2" type="password" placeholder="重复密码"
                autocomplete="off">
         <div class="row">
             <div class="col-sm-12">
@@ -46,7 +46,7 @@
         </div>
         <h3>确认身份</h3>
         <div class="form-group">
-            <input class="input-lg form-control" id="password" name="password" type="password" placeholder="密码"
+            <input class=" form-control" id="password" name="password" type="password" placeholder="密码"
                    autocomplete="off">
         </div>
         {% for message in messages %}
