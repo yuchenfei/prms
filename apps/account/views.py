@@ -438,7 +438,8 @@ def import_teacher(request):
             teachers.append(t)
         Teacher.objects.bulk_create(teachers)
         fs.delete(UPLOAD_XLSX_FILE)  # 删除暂存文件
-        return HttpResponse('OK')
+        messages.add_message(request, messages.SUCCESS, '导入教师成功')
+        return redirect('import_teacher')
     return render(request, 'account/import_teacher_list.html', response)
 
 
