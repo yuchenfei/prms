@@ -82,15 +82,10 @@ class PostgraduateLoginForm(Form):
 
 class GroupTeacherMemberForm(Form):
     teacher_member = ModelMultipleChoiceField(
-        queryset=Teacher.objects.filter(lead_group=None).all(),  # 过滤非组长的教师
+        queryset=Teacher.objects.filter(lead_group=None, group=None).all(),  # 过滤非组长、未加入组的教师
         required=False,
         widget=FilteredSelectMultiple("教师", is_stacked=False),
     )
-
-    def __init__(self, teacher=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        group = Group.objects.get(leader=teacher)
-        self.fields['teacher_member'].initial = Teacher.objects.filter(group=group).all()
 
     class Media:
         css = {'all': ('/static/admin/css/widgets.css',), }

@@ -155,16 +155,19 @@ def invite(request):
     response = dict()
     response['teacher'] = teacher = get_login_user(request)
     if request.method == 'POST':
-        form = GroupTeacherMemberForm(data=request.POST, teacher=teacher)
+        form = GroupTeacherMemberForm(data=request.POST)
         if form.is_valid():
-            group = Group.objects.get(leader=teacher)
-            for t in form.cleaned_data['teacher_member']:
-                key = str(t.uuid) + '_invited'
-                cache.set(key, group.id, None)
-            messages.add_message(request, messages.INFO, '邀请发送成功')
-            return redirect('teacher_home')
+            if form.has_changed():
+                group = Group.objects.get(leader=teacher)
+                for t in form.cleaned_data['teacher_member']:
+                    key = str(t.uuid) + '_invited'
+                    cache.set(key, group.id, None)
+                messages.add_message(request, messages.INFO, '邀请发送成功')
+                return redirect('teacher_home')
+            else:
+                return redirect('g_invite')
     else:
-        form = GroupTeacherMemberForm(teacher=teacher)
+        form = GroupTeacherMemberForm()
     response['form'] = form
     return render(request, 'account/invite.html', response)
 
