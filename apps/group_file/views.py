@@ -18,7 +18,7 @@ def group_file_list(request):
         user = get_login_user(request)
         # 判断用户类型
         if isinstance(user, Teacher):
-            response_data['teacher'] = user
+            response_data['teacher'] = teacher = user
         else:
             response_data['postgraduate'] = user
         # 表格显示相关逻辑
@@ -42,12 +42,17 @@ def group_file_list(request):
                     group_files = group_files.order_by(sort_column)
             json = {'total': group_files.count(), 'rows': []}
             for group_file in group_files:
+                is_owner = False
+                if teacher:
+                    if teacher == group_file.owner:
+                        is_owner = True
                 json['rows'].append({
                     'group_file_title': group_file.title,
                     'group_file_describe': group_file.describe,
                     'group_file_show': '是' if group_file.show else '否',
                     'group_file_owner': group_file.owner.name,
                     'group_file_date': group_file.date.strftime('%Y/%m/%d %H:%M'),
+                    'is_owner': is_owner,
                     'file_url': group_file.file.url
                 })
             json['rows'] = json['rows'][offset:offset + limit]

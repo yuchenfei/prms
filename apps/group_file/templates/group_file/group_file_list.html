@@ -15,12 +15,12 @@
     <script src="{% static 'bootstrap-table/js/locales/bootstrap-table-zh-CN.min.js' %}"></script>
     <script>
         function operateFormatter(value, row, index) {
-            return [
-                '<a class="btn btn-primary btn-sm" style="margin-right:5px;" href="' + row.file_url + '">下载</a>',
-                {% if teacher %}
-                    '<button type="button" class="RoleOfDelete btn btn-danger btn-sm" style="margin-right:5px;">删除</button>'
-                {% endif %}
-            ].join('');
+            var btn = [
+                '<a class="btn btn-primary btn-sm" style="margin-right:5px;" href="' + row.file_url + '">下载</a>'];
+            if (row.is_owner) {
+                btn.push('<button type="button" class="RoleOfDelete btn btn-danger btn-sm" style="margin-right:5px;">删除</button>')
+            }
+            return btn.join('');
         }
 
         window.operateEvents = {
