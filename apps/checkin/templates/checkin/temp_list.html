@@ -38,14 +38,15 @@
                         {% endif %}
                     </div>
                 </div>
-                <div class="panel-footer clearfix">
-                    <div class="pull-right">
-                        <button class="btn btn-sm btn-danger"
-                                onclick="window.location.href='{% url 'check_in_temp_delete' item.id %}'"
-                                {% if brief.have_read %} disabled{% endif %}>删除
-                        </button>
+                {% if item.teacher == teacher %}
+                    <div class="panel-footer clearfix">
+                        <div class="pull-right">
+                            <button class="btn btn-sm btn-danger"
+                                    onclick="window.location.href='{% url 'check_in_temp_delete' item.id %}'">删除
+                            </button>
+                        </div>
                     </div>
-                </div>
+                {% endif %}
             </div>
         {% endfor %}
         <div class="pull-right">
