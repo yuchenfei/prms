@@ -18,6 +18,17 @@
         {% endfor %}
         <input type="submit" class="btn btn-primary" value="提交" disabled>
     </form>
+    {% load staticfiles %}
+    <h3>获取 CPU_ID 设置</h3>
+    <p>获取 CPU_ID 只能在IE浏览器中实现，请在IE浏览器中进行如下设置。当签到设置中指定了计算机，则签到只能在该电脑的IE浏览器中打开二维码签到界面来完成</p>
+    <h4>步骤一</h4>
+    <img class="img-responsive" src="{% static 'img/step1.png' %}" alt="步骤一">
+    <h4>步骤二</h4>
+    <img class="img-responsive" src="{% static 'img/step2.png' %}" alt="步骤二">
+    <h4>步骤三</h4>
+    <img class="img-responsive" src="{% static 'img/step3.png' %}" alt="步骤三">
+    <h4>步骤四</h4>
+    <img class="img-responsive" src="{% static 'img/step4.png' %}" alt="步骤四">
 {% endblock %}
 
 {% block extrascript %}
