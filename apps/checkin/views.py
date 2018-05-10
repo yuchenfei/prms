@@ -278,6 +278,7 @@ def check_in_status(request):
                 response['setting'] = DailyCheckInSetting.objects.get(teacher=teacher)  # 日常签到设置
             except ObjectDoesNotExist:
                 # 教师未设置日常签到
+                messages.add_message(request, messages.WARNING, '日常签到还未设置')
                 return redirect('check_in_daily_setting')
             today = datetime.today()
             response['start'] = today - timedelta(today.weekday()) if today.weekday() != 0 else today
