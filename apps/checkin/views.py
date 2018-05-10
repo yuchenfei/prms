@@ -64,7 +64,7 @@ def temp_new(request):
     teacher = get_login_user(request)
     response_data['teacher'] = teacher
     if request.method == 'POST':
-        form = TempCheckInSettingForm(request.POST)
+        form = TempCheckInSettingForm(teacher, request.POST)
         if form.is_valid():
             setting = form.save(commit=False)
             setting.teacher = teacher
@@ -74,7 +74,7 @@ def temp_new(request):
         else:
             print(form.errors)
     else:
-        form = TempCheckInSettingForm()
+        form = TempCheckInSettingForm(teacher)
     response_data['form'] = form
     return render(request, 'checkin/temp_setting.html', response_data)
 
@@ -96,14 +96,14 @@ def daily_setting(request):
     if DailyCheckInSetting.objects.filter(teacher=teacher).exists():
         instance = DailyCheckInSetting.objects.filter(teacher=teacher).first()
     if request.method == 'POST':
-        form = DailyCheckInSettingForm(request.POST, instance=instance)
+        form = DailyCheckInSettingForm(teacher, request.POST, instance=instance)
         if form.is_valid():
             setting = form.save(commit=False)
             setting.teacher = teacher
             setting.save()
             form.save_m2m()
     else:
-        form = DailyCheckInSettingForm(instance=instance)
+        form = DailyCheckInSettingForm(teacher, instance=instance)
     response_data['form'] = form
     return render(request, 'checkin/daily_setting.html', response_data)
 

@@ -147,10 +147,15 @@
             </div>
         </div>
         <h3>签到条件</h3>
-        <div class="form-group">
-            {{ form.computer.label_tag }}
-            {{ form.computer }}
-        </div>
+        {% if form.computer.all %}
+            <div class="form-group">
+                {{ form.computer.label_tag }}
+                {{ form.computer }}
+            </div>
+        {% else %}
+            <p>无</p>
+        {% endif %}
+
         <div class="pull-right">
             <input class="btn btn-primary" type="submit" value="保存">
             <input class="btn btn-danger" type="button" value="取消">

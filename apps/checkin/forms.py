@@ -40,6 +40,10 @@ class TempCheckInSettingForm(ModelForm):
             'computer': CheckboxSelectMultiple()
         }
 
+    def __init__(self, teacher, *args, **kwargs):
+        super(TempCheckInSettingForm, self).__init__(*args, **kwargs)
+        self.fields['computer'].queryset = Computer.objects.filter(teacher=teacher)
+
 
 class DailyCheckInSettingForm(ModelForm):
     class Meta:
@@ -56,3 +60,7 @@ class DailyCheckInSettingForm(ModelForm):
         widgets = {
             'computer': CheckboxSelectMultiple(),
         }
+
+    def __init__(self, teacher, *args, **kwargs):
+        super(DailyCheckInSettingForm, self).__init__(*args, **kwargs)
+        self.fields['computer'].queryset = Computer.objects.filter(teacher=teacher)
