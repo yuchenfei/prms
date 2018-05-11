@@ -25,7 +25,11 @@
                         <span class="label label-primary">组签到</span>
                     {% endif %}
                     <div class="pull-right">
-                        <span class="label label-warning">{{ item.date }} {{ item.time }}</span>
+                        {% if item.out %}
+                            <span class="label label-default">{{ item.date }} {{ item.time }}</span>
+                        {% else %}
+                            <span class="label label-info">{{ item.date }} {{ item.time }}</span>
+                        {% endif %}
                     </div>
                 </div>
                 <div class="panel-body">
@@ -34,7 +38,7 @@
                         <span class="label label-success">{{ item.start_time }}</span> - <span
                             class="label label-danger">{{ item.end_time }}</span>
                     </div>
-                    <div>
+                    <div style="margin-bottom: 5px">
                         <span>签到条件：</span>
                         {% if item.computer.all %}
                             <span>指定计算机</span>
@@ -45,16 +49,30 @@
                             <span class="label label-default">未指定</span>
                         {% endif %}
                     </div>
+                    {% if item.absence %}
+                        <div>
+                            缺勤：
+                            {% for p in item.absence %}
+                                {{ p.name }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 </div>
-                {% if item.teacher == teacher %}
-                    <div class="panel-footer clearfix">
-                        <div class="pull-right">
+                <div class="panel-footer clearfix">
+                    签到情况：
+                    {% if item.out %}
+                        {{ item.status }}
+                    {% else %}
+                        未截止
+                    {% endif %}
+                    <div class="pull-right">
+                        {% if item.teacher == teacher %}
                             <button class="btn btn-sm btn-danger"
                                     onclick="window.location.href='{% url 'check_in_temp_delete' item.id %}'">删除
                             </button>
-                        </div>
+                        {% endif %}
                     </div>
-                {% endif %}
+                </div>
             </div>
         {% endfor %}
         <div class="pull-right">

@@ -16,7 +16,7 @@ from account.models import Postgraduate
 from account.views import get_login_user, login_required
 from leave.models import Leave
 from .check_in_code import CheckInCode
-from .models import DailyCheckIn, Computer, TempCheckInSetting, DailyCheckInSetting
+from .models import DailyCheckIn, Computer, TempCheckInSetting, DailyCheckInSetting, TempCheckIn
 from .forms import ComputerForm, TempCheckInSettingForm, DailyCheckInSettingForm
 
 
@@ -44,16 +44,31 @@ def temp_list(request):
                 Q(teacher=teacher) | Q(teacher__group=teacher.group, is_group=True)).order_by('-date', '-time').all()
         else:
             items = TempCheckInSetting.objects.filter(teacher=teacher).order_by('-date', '-time').all()
+        # 分页
         paginator = Paginator(items, 5)
         try:
-            items_p = paginator.page(int(page))
+            temp_setting_list = paginator.page(int(page))
         except PageNotAnInteger:
-            items_p = paginator.page(1)
+            temp_setting_list = paginator.page(1)
             page = 1
         except EmptyPage:
-            items_p = paginator.page(paginator.num_pages)
+            temp_setting_list = paginator.page(paginator.num_pages)
             page = paginator.num_pages
-        response_data['items'] = items_p
+        # 统计签到情况
+        for temp_setting in temp_setting_list:
+            if datetime.combine(temp_setting.date, temp_setting.end_time) < datetime.now():
+                temp_setting.out = True  # 标记已过截至时间
+                records = TempCheckIn.objects.filter(target=temp_setting)
+                if temp_setting.is_group:
+                    postgraduate_list = Postgraduate.objects.filter(teacher__group=teacher.group)
+                else:
+                    postgraduate_list = Postgraduate.objects.filter(teacher=teacher)
+                temp_setting.status = '{}/{}'.format(len(records), len(postgraduate_list))
+                postgraduate_set = set(postgraduate_list)
+                for record in records:
+                    postgraduate_set.remove(record.postgraduate)
+                temp_setting.absence = postgraduate_set
+        response_data['items'] = temp_setting_list
         response_data['range'] = paginator.page_range
         response_data['page'] = int(page)
         return render(request, 'checkin/temp_list.html', response_data)
