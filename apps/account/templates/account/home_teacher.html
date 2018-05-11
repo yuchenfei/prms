@@ -4,7 +4,15 @@
     <h2>最新的消息</h2>
     {% if messages %}
         {% for message in messages %}
-            <div class="alert alert-info" role="alert">{{ message }}</div>
+            {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+                <div class="alert alert-danger" role="alert">{{ message }}</div>
+            {% elif message.level == DEFAULT_MESSAGE_LEVELS.WARNING %}
+                <div class="alert alert-warning" role="alert">{{ message }}</div>
+            {% elif message.level == DEFAULT_MESSAGE_LEVELS.INFO %}
+                <div class="alert alert-info" role="alert">{{ message }}</div>
+            {% elif message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+                <div class="alert alert-success" role="alert">{{ message }}</div>
+            {% endif %}
         {% endfor %}
     {% endif %}
     {% if invited %}
@@ -23,6 +31,25 @@
                 </div>
             </div>
         </div>
+    {% endif %}
+    {% if request_set %}
+        {% for p in request_set %}
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    {{ p.name }} 申请变更设备
+                </div>
+                <div class="panel-footer clearfix">
+                    <div class="pull-right">
+                        <form action="{% url 'handle_change_device' p.uuid %}" method="post">
+                            {% csrf_token %}
+                            <input type="text" name="result" hidden>
+                            <input type="button" class="btn btn-sm btn-success" value="同意">
+                            <input type="button" class="btn btn-sm btn-danger" value="拒绝">
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
     {% endif %}
 {% endblock %}
 

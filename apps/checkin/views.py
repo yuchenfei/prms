@@ -84,7 +84,7 @@ def temp_delete(request, temp_id):
     if temp_setting:
         name = temp_setting.name
         temp_setting.delete()
-        messages.add_message(request, messages.INFO, '成功删除 {}'.format(name))
+        messages.add_message(request, messages.SUCCESS, '成功删除 {}'.format(name))
     return redirect('check_in_temp_list')
 
 

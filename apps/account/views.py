@@ -107,10 +107,16 @@ def home(request):
 def teacher_home(request):
     response = dict()
     response['teacher'] = teacher = get_login_user(request)
+    # 处理邀请信息
     key = str(teacher.uuid) + '_invited'
     group_id = cache.get(key)
     if group_id and Group.objects.filter(id=group_id).exists():
         response['invited'] = Group.objects.get(id=group_id)
+    # 处理变更设备信息
+    key = str(teacher.uuid) + '_chang_device'
+    request_set = cache.get(key, set())
+    if request_set:
+        response['request_set'] = request_set
     return render(request, 'account/home_teacher.html', response)
 
 
@@ -162,7 +168,7 @@ def invite(request):
                 for t in form.cleaned_data['teacher_member']:
                     key = str(t.uuid) + '_invited'
                     cache.set(key, group.id, None)
-                messages.add_message(request, messages.INFO, '邀请发送成功')
+                messages.add_message(request, messages.SUCCESS, '邀请发送成功')
                 return redirect('teacher_home')
             else:
                 return redirect('g_invite')
@@ -181,9 +187,9 @@ def handle_invite(request, group_id):
         if result == 'approve':
             teacher.group = group
             teacher.save()
-            messages.add_message(request, messages.INFO, '已加入{}课题组'.format(group.name))
+            messages.add_message(request, messages.SUCCESS, '已加入{}课题组'.format(group.name))
         elif result == 'reject':
-            messages.add_message(request, messages.INFO, '已拒绝{}的邀请'.format(group.leader.name))
+            messages.add_message(request, messages.WARNING, '已拒绝{}的邀请'.format(group.leader.name))
         key = str(teacher.uuid) + '_invited'
         cache.delete(key)
         return redirect('teacher_home')
@@ -198,7 +204,7 @@ def remove(request):
             teacher = Teacher.objects.get(uuid=uuid)
             teacher.group = None
             teacher.save()
-            messages.add_message(request, messages.INFO, '{} 已被移出组'.format(teacher.name))
+            messages.add_message(request, messages.WARNING, '{} 已被移出组'.format(teacher.name))
             return JsonResponse(dict(result=True))
 
 
@@ -259,7 +265,7 @@ def add_postgraduate(request):
             postgraduate.teacher = teacher
             create_password(postgraduate)
             postgraduate.save()
-            messages.add_message(request, messages.INFO, '添加成功')
+            messages.add_message(request, messages.SUCCESS, '添加成功')
             return redirect('postgraduate_list')
     else:
         form = PostgraduateForm()
@@ -276,9 +282,14 @@ def edit_postgraduate(request):
     if request.method == 'POST':
         form = PostgraduateForm(request.POST, instance=postgraduate)
         if form.is_valid():
-            form.save()
-            messages.add_message(request, messages.INFO, '修改成功')
-            return redirect('postgraduate_list')
+            if form.has_changed():
+                form.save()
+                # 解除设备绑定
+                device = Device.objects.get(postgraduate=postgraduate)
+                device.imei = None
+                device.save()
+                messages.add_message(request, messages.SUCCESS, '修改成功')
+                return redirect('postgraduate_list')
     else:
         form = PostgraduateForm(instance=postgraduate)
     response['form'] = form
@@ -294,7 +305,7 @@ def delete_postgraduate(request):
         if postgraduate:
             postgraduate.delete()
             response['result'] = True
-            messages.add_message(request, messages.INFO, '成功删除')
+            messages.add_message(request, messages.SUCCESS, '成功删除')
         else:
             response['result'] = False
         return JsonResponse(response)
@@ -498,14 +509,14 @@ def setting_t(request):
             if form.is_valid():
                 if form.has_changed():
                     form.save()
-                    messages.add_message(request, messages.INFO, '个人资料修改成功')
+                    messages.add_message(request, messages.SUCCESS, '个人资料修改成功')
             if password_new:
                 teacher.password = password_new
                 create_password(teacher)
                 teacher.save()
-                messages.add_message(request, messages.INFO, '密码修改成功')
+                messages.add_message(request, messages.SUCCESS, '密码修改成功')
         else:
-            messages.add_message(request, messages.WARNING, '密码错误')
+            messages.add_message(request, messages.ERROR, '密码错误')
     else:
         form = TeacherForm(instance=teacher)
     response['form'] = form
@@ -516,23 +527,53 @@ def setting_t(request):
 def setting_p(request):
     response = dict()
     response['postgraduate'] = postgraduate = get_login_user(request)
+
     if request.method == 'POST':
         form = PostgraduateForm(request.POST, instance=postgraduate)
+        change_device = request.POST.get('change_device')
         password = request.POST.get('password')
         password_new = request.POST.get('password1')
         if verify_teacher_by_password(postgraduate.phone, password):
             if form.is_valid():
                 if form.has_changed():
                     form.save()
-                    messages.add_message(request, messages.INFO, '个人资料修改成功')
+                    messages.add_message(request, messages.SUCCESS, '个人资料修改成功')
+            if change_device:
+                key = str(postgraduate.teacher.uuid) + '_chang_device'
+                request_set = cache.get(key, set())
+                request_set.add(postgraduate)
+                cache.set(key, request_set, None)
+                messages.add_message(request, messages.SUCCESS, '已向教师发送变更设备请求')
             if password_new:
                 postgraduate.password = password_new
                 create_password(postgraduate)
                 postgraduate.save()
-                messages.add_message(request, messages.INFO, '密码修改成功')
+                messages.add_message(request, messages.SUCCESS, '密码修改成功')
         else:
-            messages.add_message(request, messages.WARNING, '密码错误')
+            messages.add_message(request, messages.ERROR, '密码错误')
     else:
         form = PostgraduateForm(instance=postgraduate)
     response['form'] = form
+    if Device.objects.filter(postgraduate=postgraduate).exists():
+        device = Device.objects.get(postgraduate=postgraduate)
+        response['has_imei'] = True if device.imei else False
     return render(request, 'account/setting.html', response)
+
+
+@login_required
+def handle_change_device(request, uuid):
+    if request.method == 'POST':
+        postgraduate = Postgraduate.objects.get(uuid=uuid)
+        result = request.POST.get('result')
+        if result == 'approve':
+            device = Device.objects.get(postgraduate=postgraduate)
+            device.imei = None
+            device.save()
+            messages.add_message(request, messages.SUCCESS, '已允许{}的变更设备请求'.format(postgraduate.name))
+        elif result == 'reject':
+            messages.add_message(request, messages.WARNING, '已拒绝{}的变更设备请求'.format(postgraduate.name))
+        key = str(postgraduate.teacher.uuid) + '_chang_device'
+        request_set = cache.get(key, set())
+        request_set.remove(postgraduate)
+        cache.set(key, request_set, None)
+        return redirect('teacher_home')

@@ -31,4 +31,7 @@ urlpatterns = [
     url(r'^teacher/import_teacher$', views.import_teacher, name='import_teacher'),  # 导入教师
     url(r'^teacher/table_uploaded_teacher_list$', views.table_uploaded_teacher_list,  # 导入教师预览
         name='table_uploaded_teacher_list'),
+
+    url(r'^teacher/handle_change_device/(?P<uuid>[0-9A-Fa-f-]+)/$', views.handle_change_device,
+        name='handle_change_device')
 ]

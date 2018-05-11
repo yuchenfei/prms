@@ -20,6 +20,12 @@
                 </div>
             {% endif %}
         {% endfor %}
+        {% if postgraduate %}
+            {% if has_imei %}
+                <h3>变更设备</h3>
+                <input name="change_device" type="checkbox">申请变更设备</input>
+            {% endif %}
+        {% endif %}
         <h3>修改密码</h3>
         <input class=" form-control" id="password1" name="password1" type="password" placeholder="新密码"
                autocomplete="off">
@@ -49,13 +55,19 @@
             <input class=" form-control" id="password" name="password" type="password" placeholder="密码"
                    autocomplete="off">
         </div>
-        {% for message in messages %}
-            {% if message.level == DEFAULT_MESSAGE_LEVELS.WARNING %}
-                <div class="alert alert-danger" role="alert">{{ message }}</div>
-            {% else %}
-                <div class="alert alert-success" role="alert">{{ message }}</div>
-            {% endif %}
-        {% endfor %}
+        {% if messages %}
+            {% for message in messages %}
+                {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+                    <div class="alert alert-danger" role="alert">{{ message }}</div>
+                {% elif message.level == DEFAULT_MESSAGE_LEVELS.WARNING %}
+                    <div class="alert alert-warning" role="alert">{{ message }}</div>
+                {% elif message.level == DEFAULT_MESSAGE_LEVELS.INFO %}
+                    <div class="alert alert-info" role="alert">{{ message }}</div>
+                {% elif message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+                    <div class="alert alert-success" role="alert">{{ message }}</div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
         <div class="js_message"></div>
         <div class="pull-right">
             <input class="btn btn-primary" onclick="checkNewPassword()" type="button" value="修改">

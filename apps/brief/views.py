@@ -124,5 +124,5 @@ def delete(request, brief_id):
         brief = Brief.objects.get(id=brief_id)
         if brief:
             brief.delete()
-            messages.add_message(request, messages.INFO, '成功删除')
+            messages.add_message(request, messages.SUCCESS, '成功删除')
         return redirect('brief_list_p')
