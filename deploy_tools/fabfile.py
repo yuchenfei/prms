@@ -44,7 +44,7 @@ def _update_settings(source_folder, site_name):
         'ALLOWED_HOSTS =.+$',
         'ALLOWED_HOSTS = ["%s"]' % (site_name,)
         )
-    sed(settings_path, "'read_default_file': 'prms/my.cnf'", "'read_default_file': '../database/my.cnf'")
+    sed(settings_path, "prms/my.cnf", "../database/my.cnf")
     secret_key_file = source_folder + '/prms/secret_key.py'
     if not exists(secret_key_file):
         chars = 'abcdefghjiklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'
