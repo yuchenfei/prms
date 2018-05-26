@@ -44,6 +44,7 @@ def _update_settings(source_folder, site_name):
         'ALLOWED_HOSTS =.+$',
         'ALLOWED_HOSTS = ["%s"]' % (site_name,)
         )
+    sed(settings_path, "'read_default_file': 'prms/my.cnf'", "'read_default_file': '../database/my.cnf'")
     secret_key_file = source_folder + '/prms/secret_key.py'
     if not exists(secret_key_file):
         chars = 'abcdefghjiklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'
@@ -71,6 +72,9 @@ def _update_static_files(source_folder):
 
 def _update_database(source_folder):
     """更新数据库"""
-    run('cd %s && ../virtualenv/bin/python3 manage.py migrate --noinput' % (
-        source_folder,
-    ))
+    my_cnf = source_folder + '/../database/my.cnf'
+    if not exists(my_cnf):
+        run('cd %s && cp deploy_tools/my.cnf ../database/my.cnf' % (source_folder,))
+        print('请在服务器上完成MySQL配置，然后重新运行fab，配置文件目录：%s/database/my.cnf' % (source_folder,))
+    else:
+        run('cd %s && ../virtualenv/bin/python3 manage.py migrate --noinput' % (source_folder,))

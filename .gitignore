@@ -2,9 +2,6 @@
 .idea/
 .vscode/
 
-# Database
-db.sqlite3
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -34,4 +31,7 @@ MANIFEST
 
 # 媒体存储文件夹
 media/
+
+# MySQL数据
+/prms/my.cnf
 
