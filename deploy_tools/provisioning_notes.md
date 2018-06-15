@@ -13,7 +13,7 @@
 
 以Ubuntu为例，可以执行下面的命令安装：
 
-    sudo update
+    sudo apt update
 	sudo apt install nginx git python3 python3-pip libmysqlclient-dev
 	sudo pip3 install virtualenv
 
