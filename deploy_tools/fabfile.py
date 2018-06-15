@@ -17,7 +17,7 @@ def deploy():
     _update_settings(source_folder, env.host)
     _update_virtualenv(source_folder)
     _update_static_files(source_folder)
-    _update_database(source_folder)
+    _update_database(site_folder)
 
 
 def _create_directory_structure_if_necessary(site_folder):
@@ -70,11 +70,12 @@ def _update_static_files(source_folder):
     ))
 
 
-def _update_database(source_folder):
+def _update_database(site_folder):
     """更新数据库"""
-    my_cnf = source_folder + '/../database/my.cnf'
+    source_folder = site_folder + '/source'
+    my_cnf = site_folder + '/database/my.cnf'
     if not exists(my_cnf):
         run('cd %s && cp deploy_tools/my.cnf ../database/my.cnf' % (source_folder,))
-        print('请在服务器上完成MySQL配置，然后重新运行fab，配置文件目录：%s/database/my.cnf' % (source_folder,))
+        print('请在服务器上完成MySQL配置，然后重新运行fab，配置文件目录：%s' % (my_cnf,))
     else:
         run('cd %s && ../virtualenv/bin/python3 manage.py migrate --noinput' % (source_folder,))
