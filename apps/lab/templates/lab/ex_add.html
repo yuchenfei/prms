@@ -2,8 +2,8 @@
 
 {% block content %}
     {% load widget_tweaks %}
-    <h2>编辑学生</h2>
-    <form method="post">
+    <h2>添加实验</h2>
+    <form class="form" method="post">
         {% csrf_token %}
         {% for field in form %}
             {% if field.errors %}
@@ -33,8 +33,7 @@
             {% endfor %}
         {% endif %}
         <div class="pull-right">
-            <input class="btn btn-primary" type="submit" value="修改">
-            <a class="btn btn-danger" href="{% url 'postgraduate_list' %}">返回</a>
+            <input class="btn btn-success" type="submit" value="保存">
         </div>
     </form>
 {% endblock %}

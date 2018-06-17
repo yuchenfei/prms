@@ -38,13 +38,35 @@
                     </li>
                 {% endif %}
                 <li class="sub-menu {% nav_class 'postgraduate_list' 'add_postgraduate' %}">
-                    <a href="javascript:void(0);">研究生管理<i class="glyphicon glyphicon-chevron-right pull-right"></i></a>
+                    <a href="javascript:void(0);">学生管理<i class="glyphicon glyphicon-chevron-right pull-right"></i></a>
                     <ul>
                         <li class="{% nav_class 'postgraduate_list' %}">
-                            <a href="{% url 'postgraduate_list' %}">研究生列表</a>
+                            <a href="{% url 'postgraduate_list' %}">学生列表</a>
                         </li>
                         <li class="{% nav_class 'add_postgraduate' %}">
-                            <a href="{% url 'add_postgraduate' %}">添加研究生</a>
+                            <a href="{% url 'add_postgraduate' %}">添加学生</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="sub-menu {% nav_class 'ex_list' 'ex_add' %}">
+                    <a href="javascript:void(0);">实验课程管理<i class="glyphicon glyphicon-chevron-right pull-right"></i></a>
+                    <ul>
+                        <li class="{% nav_class 'ex_list' %}">
+                            <a href="{% url 'ex_list' %}">实验列表</a>
+                        </li>
+                        <li class="{% nav_class 'ex_add' %}">
+                            <a href="{% url 'ex_add' %}">添加实验</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="sub-menu {% nav_class 'grade_list' 'grade_add' %}">
+                    <a href="javascript:void(0);">成绩管理<i class="glyphicon glyphicon-chevron-right pull-right"></i></a>
+                    <ul>
+                        <li class="{% nav_class 'grade_list' %}">
+                            <a href="{% url 'grade_list' %}">成绩列表</a>
+                        </li>
+                        <li class="{% nav_class 'grade_add' %}">
+                            <a href="{% url 'grade_add' %}">添加成绩</a>
                         </li>
                     </ul>
                 </li>

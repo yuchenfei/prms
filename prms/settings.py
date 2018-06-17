@@ -39,12 +39,14 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'widget_tweaks',
     'django_cleanup',
+    'django_tables2',
     'account.apps.AccountConfig',
     'checkin.apps.CheckinConfig',
     'leave.apps.LeaveConfig',
     'group_file.apps.GroupFileConfig',
     'brief.apps.BriefConfig',
     'api.apps.ApiConfig',
+    'lab.apps.LabConfig',
 ]
 
 MIDDLEWARE = [

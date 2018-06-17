@@ -35,8 +35,8 @@ class Postgraduate(models.Model):
     classes = models.CharField(max_length=30, blank=True, null=True, verbose_name='班级')
 
     class Meta:
-        verbose_name = '研究生'
-        verbose_name_plural = '研究生'
+        verbose_name = '学生'
+        verbose_name_plural = '学生'
 
     def __str__(self):
         return self.name
